@@ -4,5 +4,11 @@
   "compatibility_date": "2025-01-01",
   "assets": { 
     "not_found_handling": "single-page-application"
- }
+ },
+ "routes": [
+  {
+    "pattern": "hotel.ivobsantos.xyz",
+    "custom_domain": true
+  }
+ ]
 }
