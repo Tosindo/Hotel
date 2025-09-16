@@ -1,59 +1,30 @@
-import { useState } from "react";
 import { BigButton } from "../core/BigButton";
 import { useHotelStore } from "../hotelStore";
 import { formatNumber } from "../settingsStore";
-import { useMotionValue, motion, useTransform } from "motion/react";
-import { animate } from "motion";
-import { css } from "../../styled-system/css";
 import { Bubbles } from "lucide-react";
 import { Tooltip } from "../core/Tooltip";
 import { flex } from "../../styled-system/patterns";
-import { useComputedStore } from "../computedStore";
+import { Progress } from "../core/Progress";
 
-const progressStyles = css({
-  position: "absolute",
-  top: "0",
-  left: "0",
-  height: "full",
-  width: "0",
-  backgroundColor: "retro.100",
-  zIndex: "0",
-  opacity: "0.5",
-});
-
-const CleanRoomButton: React.FC = () => {
-  const progress = useMotionValue(0);
-  const width = useTransform(progress, (v) => `${v}%`);
-  const [cleaning, setCleaning] = useState(false);
-
+const CleanRoomButton: React.FC<{
+  cleaningPercent?: number;
+  isCleaning?: boolean;
+}> = ({ cleaningPercent = 0, isCleaning = false }) => {
   const dirtyRooms = useHotelStore((s) => s.dirtyRooms);
-  const cleanRoomDuration = useComputedStore((s) => s.cleanRoomDuration);
+  //const cleanRoomDuration = useComputedStore((s) => s.cleanRoomDuration);
 
   const onClick = () => {
-    if (progress.get() !== 0 || cleaning) return;
+    if (dirtyRooms.lte(0) || isCleaning) return;
 
-    setCleaning(true);
-    animate(progress, 100, {
-      duration: cleanRoomDuration / 1000,
-      onComplete: () => {
-        useHotelStore.getState().cleanRoom();
-        progress.set(0);
-        setCleaning(false);
-      },
-      onStop: () => {
-        progress.set(0);
-        setCleaning(false);
-      },
-      ease: "linear",
-    });
+    useHotelStore.getState().startCleaningCycle();
   };
 
   return (
     <Tooltip content="Clean a dirty room" side="bottom">
       <BigButton
         onClick={onClick}
-        disabled={dirtyRooms.lte(0) || cleaning}
-        aria-busy={cleaning ? "true" : "false"}
+        disabled={dirtyRooms.lte(0) || isCleaning}
+        aria-busy={isCleaning ? "true" : "false"}
       >
         <div
           className={flex({
@@ -66,7 +37,21 @@ const CleanRoomButton: React.FC = () => {
         </div>
         Clean Room{" "}
         {dirtyRooms.gte(0) ? <>({formatNumber(dirtyRooms)})</> : null}
-        <motion.div className={progressStyles} style={{ width }} />
+        <Progress
+          value={cleaningPercent}
+          max={1}
+          steps={8}
+          css={{
+            position: "absolute",
+            bottom: "0",
+            left: "0",
+            width: "full",
+            height: "2",
+            backgroundColor: "transparent",
+            zIndex: "0",
+            borderWidth: "0",
+          }}
+        />
       </BigButton>
     </Tooltip>
   );

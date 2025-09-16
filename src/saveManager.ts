@@ -7,6 +7,8 @@ interface SaveState {
   purchasedUpgrades: string[];
   hiredReceptionists: string;
   hiredCleaners: string;
+  hiredJuniorReceptionists: string;
+  hiredJuniorCleaners: string;
 
   cleanRooms: string;
   occupiedRooms: string;
@@ -24,6 +26,7 @@ interface SaveState {
 
   // We also need to save the checkout timer's start time to persist progress
   checkoutCycleStartTime: number;
+  cleaningCycleStartTime?: number; // in ms since epoch
 }
 
 const SAVE_KEY = "idleHotelSave";
@@ -49,6 +52,9 @@ export function saveGame() {
     dirtyRooms: state.dirtyRooms.toString(),
     pendingCheckins: state.pendingCheckins.toString(),
     pendingCleanings: state.pendingCleanings.toString(),
+    hiredJuniorReceptionists: state.hiredJuniorReceptionists.toString(),
+    hiredJuniorCleaners: state.hiredJuniorCleaners.toString(),
+    cleaningCycleStartTime: state.cleaningCycleStartTime ?? undefined,
   };
 
   // 2. Serialize, compress, and save to localStorage.
@@ -80,6 +86,10 @@ export function loadGame(saveString?: string) {
       purchasedUpgrades: loadedState.purchasedUpgrades ?? [],
       hiredReceptionists: new Decimal(loadedState.hiredReceptionists ?? 0),
       hiredCleaners: new Decimal(loadedState.hiredCleaners ?? 0),
+      hiredJuniorReceptionists: new Decimal(
+        loadedState.hiredJuniorReceptionists ?? 0
+      ),
+      hiredJuniorCleaners: new Decimal(loadedState.hiredJuniorCleaners ?? 0),
       singleRooms: new Decimal(loadedState.singleRooms ?? 0),
       doubleRooms: new Decimal(loadedState.doubleRooms ?? 0),
       tripleRooms: new Decimal(loadedState.tripleRooms ?? 0),
@@ -97,6 +107,9 @@ export function loadGame(saveString?: string) {
       checkoutCycleStartTime:
         now -
         (offlineTime % (useHotelStore.getState().checkoutCycleDuration * 1000)),
+      cleaningCycleStartTime: loadedState.cleaningCycleStartTime
+        ? now - (offlineTime - loadedState.cleaningCycleStartTime)
+        : null,
     });
 
     // Post-load calculations (like offline income) could go here.

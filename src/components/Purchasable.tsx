@@ -11,7 +11,6 @@ import { css } from "../../styled-system/css";
 interface PurchasablesProps {
   label: string;
   description?: string;
-  buttonLabel: string;
   tooltipContent?: string;
   count?: Decimal;
   maxCount?: Decimal;
@@ -22,7 +21,6 @@ interface PurchasablesProps {
 
 export const Purchasable: React.FC<PurchasablesProps> = ({
   label,
-  buttonLabel,
   description,
   count,
   maxCount,
@@ -44,13 +42,19 @@ export const Purchasable: React.FC<PurchasablesProps> = ({
         }}
       >
         <div className={vstack({ gap: "1", alignItems: "flex-start" })}>
-          <span className={css({ fontSize: "xl", fontWeight: "bold" })}>
+          <span className={css({ fontSize: "md", fontWeight: "bold" })}>
             {label}{" "}
             {count &&
               `(${formatNumber(count)}${maxCount ? `/${formatNumber(maxCount)}` : ""})`}
           </span>
           {description && (
-            <span className={css({ fontSize: "lg", color: "retro.800" })}>
+            <span
+              className={css({
+                fontSize: "sm",
+                fontWeight: "bold",
+                color: "retro.900",
+              })}
+            >
               {description}
             </span>
           )}
@@ -77,7 +81,7 @@ export const Purchasable: React.FC<PurchasablesProps> = ({
               <Check />
             ) : (
               <>
-                {buttonLabel} {formatNumber(cost, false)}
+                {formatNumber(cost, false)}
                 <Banknote />
               </>
             )}

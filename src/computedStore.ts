@@ -15,6 +15,9 @@ interface ComputedStore {
   receptionistPrice: Decimal;
   cleanerPrice: Decimal;
 
+  juniorReceptionistPrice: Decimal;
+  juniorCleanerPrice: Decimal;
+
   receptionistCheckinRate: Decimal;
   cleanerCleaningRate: Decimal;
 
@@ -47,4 +50,6 @@ export const useComputedStore = create<ComputedStore>(() => ({
   maxTripleRooms: new Decimal(0),
   maxQuadRooms: new Decimal(0),
   maxPenthouseRooms: new Decimal(0),
+  juniorReceptionistPrice: new Decimal(15),
+  juniorCleanerPrice: new Decimal(25),
 }));

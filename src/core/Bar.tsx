@@ -59,7 +59,7 @@ const BarStat: React.FC<BarStatProps> = ({
             padding: "2",
             alignItems: "center",
             justifyContent: "center",
-            fontSize: "2xl",
+            fontSize: "lg",
             shadow: "inset-retro-xs",
             bg: "retro.600",
             border: "retro-border-xs",
@@ -72,7 +72,7 @@ const BarStat: React.FC<BarStatProps> = ({
           className={flex({
             borderLeft: "none",
             padding: "2",
-            fontSize: "2xl",
+            fontSize: "lg",
             shadow: "inset-retro-xs",
             bg: "retro.500",
             border: "retro-border-xs",

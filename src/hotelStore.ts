@@ -32,8 +32,12 @@ const BASE_BUILDING_PRICE = new Decimal(1000);
 const RECEPTIONIST_BASE_COST = new Decimal(20);
 const CLEANER_BASE_COST = new Decimal(30);
 
-const RECEPTIONIST_BASE_CHECKIN_RATE = new Decimal(0.4); // guests per second
-const CLEANER_BASE_CLEANING_RATE = new Decimal(0.25); // rooms per second
+const JUNIOR_PRICE_DIVIDER = new Decimal(3);
+
+const RECEPTIONIST_BASE_CHECKIN_RATE = new Decimal(0.6); // guests per second
+const CLEANER_BASE_CLEANING_RATE = new Decimal(0.45); // rooms per second
+
+const JUNIOR_RATE_DIVIDER = new Decimal(3);
 
 const BASE_CLEAN_ROOM_DURATION = 3000; // in milliseconds
 
@@ -49,7 +53,10 @@ enum UpgradeType {
 interface BaseUpgrade {
   key: string;
   name: string;
+  /** Story-like description */
   description: string;
+  /** Description detailing effects of upgrade */
+  detail: string;
   cost: Decimal;
 }
 
@@ -101,7 +108,8 @@ export const UPGRADES: Upgrade[] = [
     type: UpgradeType.ImproveCleaningSpeed,
     name: "Better cleaning supplies",
     description:
-      "With better cleaning supplies, you can clean rooms half a second faster.",
+      "With better cleaning supplies, you feel invigorated, ready to tackle any mess.",
+    detail: "Reduces your room cleaning time by 0.5 seconds.",
     cost: new Decimal(15),
     apply: (duration: number) => duration - 500,
   },
@@ -110,7 +118,8 @@ export const UPGRADES: Upgrade[] = [
     type: UpgradeType.RoomValue,
     name: "Lonely flower",
     description:
-      "Adds a single flower to each single room, increasing its value by 20%.",
+      "Adds a single flower to each single room, keeping company to all the lonely guests.",
+    detail: "Increases single room value by 20%.",
     cost: new Decimal(25),
     apply: (value: Decimal) => value.mul(1.2),
     roomType: "single",
@@ -121,6 +130,7 @@ export const UPGRADES: Upgrade[] = [
     name: "Cleaning-sensitive ear pieces",
     description:
       "These ear pieces helps you clean faster by playing motivational sounds based on the current room's cleanliness.",
+    detail: "Increases your cleaning speed by 35%.",
     cost: new Decimal(40),
     apply: (duration: number) => duration / 1.35,
   },
@@ -130,7 +140,8 @@ export const UPGRADES: Upgrade[] = [
     staffType: "receptionist",
     name: "Espresso Machine",
     description:
-      "Wired directly to the mains for extra kick. Receptionists check in guests 25% faster.",
+      "Wired directly to the mains for extra kick. Sometimes you can see your receptionists vibrating slightly.",
+    detail: "Increases receptionist check-in speed by 25%.",
     cost: new Decimal(80),
     apply: (rate: Decimal) => rate.mul(1.25),
   },
@@ -139,7 +150,8 @@ export const UPGRADES: Upgrade[] = [
     type: UpgradeType.RoomValue,
     name: "Modern interior",
     description:
-      "A modern interior design for double rooms, increasing their value by 25%.",
+      "A modern interior design for double rooms, inspired by some artist you forgot the name of.",
+    detail: "Increases double room value by 25%.",
     cost: new Decimal(100),
     apply: (value: Decimal) => value.mul(1.25),
     roomType: "double",
@@ -150,7 +162,8 @@ export const UPGRADES: Upgrade[] = [
     staffType: "cleaner",
     name: "Caffeinated Mop Water",
     description:
-      "Cleaners absorb caffeine through their skin, allowing them to clean 25% faster.",
+      "Cleaners absorb caffeine through their skin apparently, how? Who knows.",
+    detail: "Increases cleaner cleaning speed by 25%.",
     cost: new Decimal(120),
     apply: (rate: Decimal) => rate.mul(1.25),
   },
@@ -159,7 +172,8 @@ export const UPGRADES: Upgrade[] = [
     type: UpgradeType.BuildingDiscount,
     name: "Dubious estate agent",
     description:
-      "A dubious fellow who claims he can get you a discount on buildings. Somehow, it works. Buildings are 10% cheaper.",
+      "A dubious fellow who claims he can get you a discount on buildings. Somehow, it works. We think.",
+    detail: "Reduces building costs by 10%.",
     cost: new Decimal(200),
     apply: (cost: Decimal) => cost.mul(0.9),
   },
@@ -168,7 +182,8 @@ export const UPGRADES: Upgrade[] = [
     type: UpgradeType.RoomValue,
     name: "Luxury penthouse, with a pool?",
     description:
-      "Somehow you manage to add a pool to all your penthouse rooms, increasing their value by 30%.",
+      "Somehow you manage to add a pool to all your penthouse rooms, despite their size. Some guests complain having to sleep in a room that's just a pool, but hey, more value right?",
+    detail: "Increases penthouse room value by 30%.",
     cost: new Decimal(500),
     apply: (value: Decimal) => value.mul(1.3),
     roomType: "penthouse",
@@ -178,7 +193,8 @@ export const UPGRADES: Upgrade[] = [
     type: UpgradeType.RoomDiscount,
     name: "Crazy guy with an hammer",
     description:
-      "A crazy guy that hammers rooms into shape, refuses to work on anything other than single rooms due to never having had a relationship. (10% off single rooms)",
+      "A crazy guy that hammers rooms into shape, refuses to work on anything other than single rooms due to never having had a relationship.",
+    detail: "Reduces single room costs by 10%.",
     cost: new Decimal(750),
     apply: (cost: Decimal) => cost.mul(0.9),
     roomType: "single",
@@ -189,7 +205,8 @@ export const UPGRADES: Upgrade[] = [
     staffType: "receptionist",
     name: "Unpaid Intern Program",
     description:
-      "Gain valuable 'exposure' by hiring receptionists for 20% less.",
+      "Hire unpaid interns for 'exposure', they'll do the job of a receptionist for free.",
+    detail: "Reduces receptionist hiring costs by 20%.",
     cost: new Decimal(1500),
     apply: (cost: Decimal) => cost.mul(0.8),
   },
@@ -198,8 +215,8 @@ export const UPGRADES: Upgrade[] = [
     type: UpgradeType.RoomValue,
     roomType: "single",
     name: "Slightly Less Haunted Mirror",
-    description:
-      "The reflection only sometimes whispers back now. Single room value +50%.",
+    description: "The reflection only sometimes whispers back now.",
+    detail: "Increases single room value by 50%.",
     cost: new Decimal(2000),
     apply: (value: Decimal) => value.mul(1.5),
   },
@@ -209,7 +226,8 @@ export const UPGRADES: Upgrade[] = [
     staffType: "receptionist",
     name: "Hypnotic Training Seminar",
     description:
-      "A mandatory 8-hour seminar with a suspiciously swinging pocket watch. Receptionists are now twice as efficient.",
+      "A mandatory 8-hour seminar with a suspiciously swinging pocket watch. Those hypnotist lessons finally paid off.",
+    detail: "Doubles receptionist check-in speed.",
     cost: new Decimal(5000),
     apply: (rate: Decimal) => rate.mul(2),
   },
@@ -218,7 +236,8 @@ export const UPGRADES: Upgrade[] = [
     type: UpgradeType.RoomValue,
     roomType: "triple",
     name: "Complimentary Séance Kit",
-    description: "Great for group activities! Triple room value +40%.",
+    description: "Great for group activities! Just don't bring a Ouija board.",
+    detail: "Increases triple room value by 40%.",
     cost: new Decimal(8000),
     apply: (value: Decimal) => value.mul(1.4),
   },
@@ -227,7 +246,8 @@ export const UPGRADES: Upgrade[] = [
     type: UpgradeType.BuildingDiscount,
     name: "Architectural Loophole",
     description:
-      "By classifying new buildings as 'performance art installations', you save 15% on construction costs.",
+      "By classifying new buildings as 'performance art installations', you save on construction costs.",
+    detail: "Reduces building costs by 15%.",
     cost: new Decimal(10000),
     apply: (cost: Decimal) => cost.mul(0.85),
   },
@@ -250,10 +270,15 @@ interface HotelStore {
   hiredReceptionists: Decimal;
   hiredCleaners: Decimal;
 
+  hiredJuniorReceptionists: Decimal;
+  hiredJuniorCleaners: Decimal;
+
   purchasedUpgrades: string[];
 
   checkoutCycleDuration: number; // in seconds
   checkoutCycleStartTime: number;
+
+  cleaningCycleStartTime: number | null;
 
   pendingCheckins: Decimal;
   pendingCleanings: Decimal;
@@ -265,14 +290,16 @@ interface HotelStore {
   buyBuilding: () => void;
   hireReceptionist: () => void;
   hireCleaner: () => void;
+  hireJuniorReceptionist: () => void;
+  hireJuniorCleaner: () => void;
   checkInGuest: () => void;
-  cleanRoom: () => void;
-  dirtyRoom: () => void;
+  startCleaningCycle: () => void;
   tick: (deltaTime: number) => void;
   getDayProgress: () => {
     progress: number;
     time: string;
   };
+  getCleaningProgress: () => number;
 
   addMoney?: (amount: Decimal) => void; // For debugging purposes only
 }
@@ -294,9 +321,14 @@ const useHotelStore = create<HotelStore>()((set, get) => ({
   hiredReceptionists: new Decimal(0),
   hiredCleaners: new Decimal(0),
 
+  hiredJuniorReceptionists: new Decimal(0),
+  hiredJuniorCleaners: new Decimal(0),
+
   checkedInGuests: new Decimal(0),
   checkoutCycleDuration: 30, // 30 seconds
   checkoutCycleStartTime: Date.now(),
+
+  cleaningCycleStartTime: null,
 
   pendingCheckins: new Decimal(0),
   pendingCleanings: new Decimal(0),
@@ -359,6 +391,24 @@ const useHotelStore = create<HotelStore>()((set, get) => ({
       }));
     }
   },
+  hireJuniorReceptionist: () => {
+    const cost = useComputedStore.getState().juniorReceptionistPrice;
+    if (get().money.gte(cost)) {
+      set((state) => ({
+        money: state.money.sub(cost),
+        hiredJuniorReceptionists: state.hiredJuniorReceptionists.add(1),
+      }));
+    }
+  },
+  hireJuniorCleaner: () => {
+    const cost = useComputedStore.getState().juniorCleanerPrice;
+    if (get().money.gte(cost)) {
+      set((state) => ({
+        money: state.money.sub(cost),
+        hiredJuniorCleaners: state.hiredJuniorCleaners.add(1),
+      }));
+    }
+  },
   checkInGuest: () => {
     if (get().cleanRooms.gte(1)) {
       set((state) => ({
@@ -367,19 +417,10 @@ const useHotelStore = create<HotelStore>()((set, get) => ({
       }));
     }
   },
-  cleanRoom: () => {
-    if (get().dirtyRooms.gte(1)) {
-      set((state) => ({
-        dirtyRooms: state.dirtyRooms.sub(1),
-        cleanRooms: state.cleanRooms.add(1),
-      }));
-    }
-  },
-  dirtyRoom: () => {
-    if (get().cleanRooms.gte(1)) {
-      set((state) => ({
-        cleanRooms: state.cleanRooms.sub(1),
-        dirtyRooms: state.dirtyRooms.add(1),
+  startCleaningCycle: () => {
+    if (get().cleaningCycleStartTime === null) {
+      set(() => ({
+        cleaningCycleStartTime: Date.now(),
       }));
     }
   },
@@ -396,6 +437,27 @@ const useHotelStore = create<HotelStore>()((set, get) => ({
         checkoutCycleStartTime: currentTime,
       }));
       return;
+    }
+
+    // Check if cleaning cycle has passed
+    const elapsedTimeSinceCleaningCycleStart = state.cleaningCycleStartTime
+      ? (currentTime - state.cleaningCycleStartTime) / 1000
+      : 0;
+    if (
+      state.cleaningCycleStartTime &&
+      elapsedTimeSinceCleaningCycleStart >=
+        useComputedStore.getState().cleanRoomDuration / 1000
+    ) {
+      set(() => ({
+        cleaningCycleStartTime: null,
+      }));
+
+      if (state.dirtyRooms.gt(0)) {
+        set((s) => ({
+          dirtyRooms: s.dirtyRooms.sub(1),
+          cleanRooms: s.cleanRooms.add(1),
+        }));
+      }
     }
 
     // Check in guests based on the number of receptionists and their check-in rate
@@ -464,6 +526,16 @@ const useHotelStore = create<HotelStore>()((set, get) => ({
     const progress = Math.min(elapsedTime / state.checkoutCycleDuration, 1);
 
     return { progress, time };
+  },
+  getCleaningProgress: () => {
+    const state = get();
+    if (state.cleaningCycleStartTime === null) return 0;
+
+    const currentTime = Date.now();
+    const elapsedTime = currentTime - state.cleaningCycleStartTime;
+    const duration = useComputedStore.getState().cleanRoomDuration;
+
+    return Math.min(elapsedTime / duration, 1);
   },
 
   addMoney: (amount: Decimal) => {
@@ -614,6 +686,24 @@ useHotelStore.subscribe((state) => {
     }
   });
 
+  // junior staff adjustments (unnaffected by upgrades, so added last)
+  const juniorReceptionistRate = RECEPTIONIST_BASE_CHECKIN_RATE.div(
+    JUNIOR_RATE_DIVIDER
+  ).mul(state.hiredJuniorReceptionists);
+  receptionistCheckinRate = receptionistCheckinRate.add(juniorReceptionistRate);
+
+  const juniorCleanerRate = CLEANER_BASE_CLEANING_RATE.div(
+    JUNIOR_RATE_DIVIDER
+  ).mul(state.hiredJuniorCleaners);
+  cleanerCleaningRate = cleanerCleaningRate.add(juniorCleanerRate);
+
+  const juniorReceptionistCost = RECEPTIONIST_BASE_COST.div(
+    JUNIOR_PRICE_DIVIDER
+  ).mul(new Decimal(1.15).pow(state.hiredJuniorReceptionists));
+  const juniorCleanerCost = CLEANER_BASE_COST.div(JUNIOR_PRICE_DIVIDER).mul(
+    new Decimal(1.15).pow(state.hiredJuniorCleaners)
+  );
+
   const potentialIncome = singleRoomPotentialIncome
     .mul(singleRooms)
     .add(doubleRoomPotentialIncome.mul(doubleRooms))
@@ -655,6 +745,8 @@ useHotelStore.subscribe((state) => {
     maxTripleRooms,
     maxQuadRooms,
     maxPenthouseRooms,
+    juniorReceptionistPrice: juniorReceptionistCost,
+    juniorCleanerPrice: juniorCleanerCost,
   });
 });
 

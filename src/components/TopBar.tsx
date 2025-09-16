@@ -11,13 +11,17 @@ const TopBar: React.FC = () => {
   return (
     <Bar variant="light" css={{ p: "1", gap: "2" }}>
       <BarStat
-        css={{ width: "28" }}
+        css={{ width: "36" }}
         icon={<Wallet />}
         tooltipContent="Total Money"
       >
         {formatNumber(money, false)}
       </BarStat>
-      <BarStat icon={<BanknoteArrowUp />} tooltipContent="Income per second">
+      <BarStat
+        css={{ width: "40" }}
+        icon={<BanknoteArrowUp />}
+        tooltipContent="Income per second"
+      >
         {formatNumber(incomePerSecond, false)}/s
       </BarStat>
     </Bar>

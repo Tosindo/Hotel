@@ -11,7 +11,7 @@ const Button = styled("button", {
     backgroundColor: "retro.400",
     color: "white",
     fontWeight: "bold",
-    fontSize: "md",
+    fontSize: "xs",
     cursor: "pointer",
     p: "2",
     gap: "2",

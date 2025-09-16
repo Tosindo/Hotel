@@ -13,7 +13,9 @@
     "deploy": "bun run build && wrangler deploy"
   },
   "dependencies": {
+    "@fontsource/silkscreen": "^5.2.7",
     "@fontsource/vt323": "^5.2.6",
+    "@radix-ui/react-progress": "^1.1.7",
     "@radix-ui/react-tooltip": "^1.2.8",
     "break_infinity.js": "^2.2.0",
     "clsx": "^2.1.1",
