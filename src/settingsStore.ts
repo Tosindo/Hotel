@@ -31,7 +31,7 @@ const formatNumber = (
   simple = true
 ) => {
   const { formatter } = useSettingsStore.getState();
-  return formatter.format(num, {
+  return formatter.formatShort(num, {
     sigfigs: 5,
     maxSmall: simple ? 0 : 1000,
   });

@@ -44,7 +44,7 @@ export default defineConfig({
           },
           "retro-xs": {
             value:
-              "2px 2px 0px 0px rgba(0, 0, 0, 0.25) inset, 4px 4px 0px 0px rgba(0, 0, 0, 0.25)",
+              "2px 2px 0px 0px rgba(0, 0, 0, 0.25) inset, 8px 8px 0px 0px rgba(0, 0, 0, 0.25)",
           },
         },
         borders: {

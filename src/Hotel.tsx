@@ -46,6 +46,12 @@ const Hotel: React.FC = () => {
     penthouseRoomPrice,
     receptionistPrice,
     cleanerPrice,
+    buildingPrice,
+    maxSingleRooms,
+    maxDoubleRooms,
+    maxTripleRooms,
+    maxQuadRooms,
+    maxPenthouseRooms,
   } = useComputedStore(
     useShallow((s) => ({
       singleRoomPrice: s.singleRoomPrice,
@@ -55,6 +61,12 @@ const Hotel: React.FC = () => {
       penthouseRoomPrice: s.penthouseRoomPrice,
       receptionistPrice: s.receptionistPrice,
       cleanerPrice: s.cleanerPrice,
+      buildingPrice: s.buildingPrice,
+      maxSingleRooms: s.maxSingleRooms,
+      maxDoubleRooms: s.maxDoubleRooms,
+      maxTripleRooms: s.maxTripleRooms,
+      maxQuadRooms: s.maxQuadRooms,
+      maxPenthouseRooms: s.maxPenthouseRooms,
     }))
   );
 
@@ -67,6 +79,7 @@ const Hotel: React.FC = () => {
     purchasedUpgrades,
     hiredReceptionists,
     hiredCleaners,
+    buildings,
   } = useHotelStore(
     useShallow((s) => ({
       singleRooms: s.singleRooms,
@@ -77,6 +90,7 @@ const Hotel: React.FC = () => {
       purchasedUpgrades: s.purchasedUpgrades,
       hiredReceptionists: s.hiredReceptionists,
       hiredCleaners: s.hiredCleaners,
+      buildings: s.buildings,
     }))
   );
 
@@ -114,6 +128,7 @@ const Hotel: React.FC = () => {
         background: "retro.400",
         width: "full",
         height: "full",
+        overflow: "auto",
       })}
     >
       <div
@@ -180,84 +195,160 @@ const Hotel: React.FC = () => {
             gap: "4",
             padding: "4",
             alignItems: "flex-start",
+            justifyContent: "center",
+            flexWrap: "wrap",
           })}
         >
-          <section className={vstack({ gap: "0", width: "full" })}>
-            <Bar css={{ fontSize: "xl", fontWeight: "bold" }}>Store:</Bar>
-            <Purchasable
-              label="Fix single room"
-              buttonLabel="Fix"
-              tooltipContent="A small room for a single guest."
-              cost={singleRoomPrice}
-              count={singleRooms}
-              onPurchase={() => useHotelStore.getState().buyRoom("single")}
-            />
-            <Purchasable
-              label="Fix double room"
-              buttonLabel="Fix"
-              tooltipContent="A comfortable room for two guests."
-              cost={doubleRoomPrice}
-              count={doubleRooms}
-              onPurchase={() => useHotelStore.getState().buyRoom("double")}
-            />
-            <Purchasable
-              label="Fix triple room"
-              buttonLabel="Fix"
-              tooltipContent="A spacious room for three guests."
-              cost={tripleRoomPrice}
-              count={tripleRooms}
-              onPurchase={() => useHotelStore.getState().buyRoom("triple")}
-            />
-            <Purchasable
-              label="Fix quad room"
-              buttonLabel="Fix"
-              tooltipContent="A large room for four guests."
-              cost={quadRoomPrice}
-              count={quadRooms}
-              onPurchase={() => useHotelStore.getState().buyRoom("quad")}
-            />
-            <Purchasable
-              label="Fix penthouse room"
-              buttonLabel="Fix"
-              tooltipContent="A luxurious room for five or more guests."
-              cost={penthouseRoomPrice}
-              count={penthouseRooms}
-              onPurchase={() => useHotelStore.getState().buyRoom("penthouse")}
-            />
+          <section
+            className={vstack({
+              gap: "0",
+              width: "full",
+              md: {
+                width: "1/3",
+              },
+            })}
+          >
+            <Bar css={{ fontSize: "xl", fontWeight: "bold", flexShrink: 0 }}>
+              Store:
+            </Bar>
+            <div
+              className={vstack({
+                width: "full",
+                gap: "0",
+                overflowY: "auto",
+                maxHeight: "[60vh]",
+              })}
+            >
+              <Purchasable
+                label="Fix single room"
+                buttonLabel="Fix"
+                description="A small room for a single guest."
+                cost={singleRoomPrice}
+                count={singleRooms}
+                maxCount={maxSingleRooms}
+                onPurchase={() => useHotelStore.getState().buyRoom("single")}
+              />
+              <Purchasable
+                label="Fix double room"
+                buttonLabel="Fix"
+                description="A comfortable room for two guests."
+                cost={doubleRoomPrice}
+                count={doubleRooms}
+                maxCount={maxDoubleRooms}
+                onPurchase={() => useHotelStore.getState().buyRoom("double")}
+              />
+              <Purchasable
+                label="Fix triple room"
+                buttonLabel="Fix"
+                description="A spacious room for three guests."
+                cost={tripleRoomPrice}
+                count={tripleRooms}
+                maxCount={maxTripleRooms}
+                onPurchase={() => useHotelStore.getState().buyRoom("triple")}
+              />
+              <Purchasable
+                label="Fix quad room"
+                buttonLabel="Fix"
+                description="A large room for four guests."
+                cost={quadRoomPrice}
+                count={quadRooms}
+                maxCount={maxQuadRooms}
+                onPurchase={() => useHotelStore.getState().buyRoom("quad")}
+              />
+              <Purchasable
+                label="Fix penthouse room"
+                buttonLabel="Fix"
+                description="A luxurious room for five or more guests."
+                cost={penthouseRoomPrice}
+                count={penthouseRooms}
+                maxCount={maxPenthouseRooms}
+                onPurchase={() => useHotelStore.getState().buyRoom("penthouse")}
+              />
+              <Purchasable
+                label="Buy adjacent building"
+                buttonLabel="Buy"
+                description="We need more space, let's buy the building next door!"
+                tooltipContent="Each building increases the total number of rooms you can possess."
+                cost={buildingPrice}
+                count={buildings}
+                onPurchase={() => useHotelStore.getState().buyBuilding()}
+              />
+            </div>
           </section>
 
-          <section className={vstack({ gap: "0", width: "full" })}>
-            <Bar css={{ fontSize: "xl", fontWeight: "bold" }}>Staff:</Bar>
-            <Purchasable
-              label="Hire receptionist"
-              buttonLabel="Hire"
-              tooltipContent="A friendly receptionist to check in guests."
-              cost={receptionistPrice}
-              count={hiredReceptionists}
-              onPurchase={() => useHotelStore.getState().hireReceptionist()}
-            />
-            <Purchasable
-              label="Hire cleaner"
-              buttonLabel="Hire"
-              tooltipContent="A friendly cleaner to keep the rooms tidy."
-              cost={cleanerPrice}
-              count={hiredCleaners}
-              onPurchase={() => useHotelStore.getState().hireCleaner()}
-            />
-          </section>
-          <section className={vstack({ gap: "0", width: "full" })}>
-            <Bar css={{ fontSize: "xl", fontWeight: "bold" }}>Upgrades:</Bar>
-            {UPGRADES.map((upgrade) => (
+          <section
+            className={vstack({
+              gap: "0",
+              width: "full",
+              md: {
+                width: "1/4",
+              },
+            })}
+          >
+            <Bar css={{ fontSize: "xl", fontWeight: "bold", flexShrink: 0 }}>
+              Staff:
+            </Bar>
+
+            <div
+              className={vstack({
+                width: "full",
+                gap: "0",
+                overflowY: "auto",
+                maxHeight: "[60vh]",
+              })}
+            >
               <Purchasable
-                key={upgrade.name}
-                label={upgrade.name}
-                buttonLabel="Upgrade"
-                tooltipContent={upgrade.description}
-                cost={upgrade.cost}
-                onPurchase={() => useHotelStore.getState().buyUpgrade(upgrade)}
-                purchased={purchasedUpgrades.includes(upgrade.key)}
+                label="Hire receptionist"
+                buttonLabel="Hire"
+                description="A friendly receptionist to check in guests."
+                cost={receptionistPrice}
+                count={hiredReceptionists}
+                onPurchase={() => useHotelStore.getState().hireReceptionist()}
               />
-            ))}
+              <Purchasable
+                label="Hire cleaner"
+                buttonLabel="Hire"
+                description="A friendly cleaner to keep the rooms tidy."
+                cost={cleanerPrice}
+                count={hiredCleaners}
+                onPurchase={() => useHotelStore.getState().hireCleaner()}
+              />
+            </div>
+          </section>
+          <section
+            className={vstack({
+              gap: "0",
+              width: "full",
+              md: { width: "1/3" },
+              overflowY: "auto",
+              maxHeight: "[60vh]",
+            })}
+          >
+            <Bar css={{ fontSize: "xl", fontWeight: "bold", flexShrink: 0 }}>
+              Upgrades:
+            </Bar>
+            <div
+              className={vstack({
+                width: "full",
+                gap: "0",
+                overflowY: "auto",
+                maxHeight: "[60vh]",
+              })}
+            >
+              {UPGRADES.map((upgrade) => (
+                <Purchasable
+                  key={upgrade.name}
+                  label={upgrade.name}
+                  buttonLabel="Upgrade"
+                  description={upgrade.description}
+                  cost={upgrade.cost}
+                  onPurchase={() =>
+                    useHotelStore.getState().buyUpgrade(upgrade)
+                  }
+                  purchased={purchasedUpgrades.includes(upgrade.key)}
+                />
+              ))}
+            </div>
           </section>
         </div>
       </div>

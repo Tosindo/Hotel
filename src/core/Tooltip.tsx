@@ -33,10 +33,10 @@ const TooltipTrigger: React.FC<
 };
 
 const styles = css.raw({
-  bg: "retro.500",
+  bg: "retro.700",
   shadow: "retro-xs",
   border: "retro-border-xs",
-  borderColor: "retro.800",
+  borderColor: "retro.900",
   color: "white",
   opacity: 1,
   zIndex: 50,
@@ -76,7 +76,7 @@ interface TooltipProps extends React.ComponentProps<typeof TooltipContent> {
 
 const Tooltip: React.FC<TooltipProps> = ({ content, children, ...props }) => {
   return (
-    <TooltipRoot>
+    <TooltipRoot open={!content ? false : undefined}>
       <TooltipTrigger asChild>{children}</TooltipTrigger>
       <TooltipContent {...props}>{content}</TooltipContent>
     </TooltipRoot>
