@@ -13,6 +13,23 @@ export default defineConfig({
   // Useful for theme customization
   theme: {
     extend: {
+      recipes: {
+        srOnly: {
+          className: "sr-only",
+          description: "Accessibility helper that visually hides an element",
+          base: {
+            position: "absolute",
+            width: "[1px]",
+            height: "[1px]",
+            padding: "0",
+            margin: "-[1px]",
+            overflow: "hidden",
+            whiteSpace: "nowrap",
+            borderWidth: "0",
+            clip: "rect(0, 0, 0, 0)",
+          },
+        },
+      },
       keyframes: {
         fadeIn: {
           from: { opacity: 0 },
@@ -145,6 +162,10 @@ export default defineConfig({
           "retro-xs": {
             value:
               "2px 2px 0px 0px rgba(0, 0, 0, 0.25) inset, 8px 8px 0px 0px rgba(0, 0, 0, 0.25)",
+          },
+          retro: {
+            value:
+              "3px 3px 0px 0px rgba(0, 0, 0, 0.25) inset, 12px 12px 0px 0px rgba(0, 0, 0, 0.25)",
           },
         },
         borders: {

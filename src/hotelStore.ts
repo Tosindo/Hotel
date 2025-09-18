@@ -443,6 +443,7 @@ const useHotelStore = create<HotelStore>()((set, get) => ({
     const elapsedTimeSinceCleaningCycleStart = state.cleaningCycleStartTime
       ? (currentTime - state.cleaningCycleStartTime) / 1000
       : 0;
+
     if (
       state.cleaningCycleStartTime &&
       elapsedTimeSinceCleaningCycleStart >=
@@ -458,6 +459,16 @@ const useHotelStore = create<HotelStore>()((set, get) => ({
           cleanRooms: s.cleanRooms.add(1),
         }));
       }
+    }
+
+    // prevent bug, if clean start is in the future reset it to null
+    if (
+      state.cleaningCycleStartTime &&
+      state.cleaningCycleStartTime > currentTime
+    ) {
+      set(() => ({
+        cleaningCycleStartTime: null,
+      }));
     }
 
     // Check in guests based on the number of receptionists and their check-in rate

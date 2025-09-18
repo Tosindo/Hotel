@@ -56,7 +56,7 @@ const BarStat: React.FC<BarStatProps> = ({
       >
         <div
           className={flex({
-            padding: "2",
+            padding: "1",
             alignItems: "center",
             justifyContent: "center",
             fontSize: "lg",

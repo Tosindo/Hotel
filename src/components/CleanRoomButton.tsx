@@ -1,17 +1,15 @@
 import { BigButton } from "../core/BigButton";
 import { useHotelStore } from "../hotelStore";
 import { formatNumber } from "../settingsStore";
-import { Bubbles } from "lucide-react";
 import { Tooltip } from "../core/Tooltip";
-import { flex } from "../../styled-system/patterns";
 import { Progress } from "../core/Progress";
+import { Sprite } from "../core/Sprite";
 
 const CleanRoomButton: React.FC<{
   cleaningPercent?: number;
   isCleaning?: boolean;
 }> = ({ cleaningPercent = 0, isCleaning = false }) => {
   const dirtyRooms = useHotelStore((s) => s.dirtyRooms);
-  //const cleanRoomDuration = useComputedStore((s) => s.cleanRoomDuration);
 
   const onClick = () => {
     if (dirtyRooms.lte(0) || isCleaning) return;
@@ -26,15 +24,7 @@ const CleanRoomButton: React.FC<{
         disabled={dirtyRooms.lte(0) || isCleaning}
         aria-busy={isCleaning ? "true" : "false"}
       >
-        <div
-          className={flex({
-            width: "full",
-            justifyContent: "center",
-            fontSize: "2xl",
-          })}
-        >
-          <Bubbles />
-        </div>
+        <Sprite type="cleaning" size={48} />
         Clean Room{" "}
         {dirtyRooms.gte(0) ? <>({formatNumber(dirtyRooms)})</> : null}
         <Progress

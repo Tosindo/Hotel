@@ -29,6 +29,31 @@ const Button = styled("button", {
       },
     },
   },
+
+  variants: {
+    variant: {
+      outline: {
+        backgroundColor: "transparent",
+        color: "retro.700",
+      },
+      dark: {
+        backgroundColor: "retro.600",
+        color: "retro.200",
+      },
+      danger: {
+        backgroundColor: "red.800",
+        borderColor: "red.900",
+        color: "white",
+      },
+    },
+    size: {
+      sm: {
+        fontSize: "xs",
+        p: "1",
+        gap: "1",
+      },
+    },
+  },
 });
 
 export { Button };

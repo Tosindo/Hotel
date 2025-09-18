@@ -8,6 +8,9 @@ interface SettingsStore {
   setFormattingType: (
     type: "standard" | "scientific" | "engineering" | "longScale"
   ) => void;
+
+  lastSaveAt: number | null;
+  setLastSaveAt: (timestamp: number) => void;
 }
 
 const useSettingsStore = create<SettingsStore>((set) => ({
@@ -24,6 +27,8 @@ const useSettingsStore = create<SettingsStore>((set) => ({
       }),
     }));
   },
+  lastSaveAt: null,
+  setLastSaveAt: (timestamp) => set(() => ({ lastSaveAt: timestamp })),
 }));
 
 const formatNumber = (

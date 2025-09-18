@@ -1,6 +1,8 @@
 import lz from "lz-string";
 import Decimal from "break_infinity.js";
 import { useHotelStore } from "./hotelStore";
+import { useSettingsStore } from "./settingsStore";
+import { GAME_VERSION } from "./config";
 
 interface SaveState {
   money: string;
@@ -13,6 +15,8 @@ interface SaveState {
   cleanRooms: string;
   occupiedRooms: string;
   dirtyRooms: string;
+
+  buildings: string;
 
   pendingCheckins: string;
   pendingCleanings: string;
@@ -27,9 +31,12 @@ interface SaveState {
   // We also need to save the checkout timer's start time to persist progress
   checkoutCycleStartTime: number;
   cleaningCycleStartTime?: number; // in ms since epoch
+
+  gameVersion?: string; // version of the game when the save was made
+  savedAt?: number; // timestamp of when the game was saved
 }
 
-const SAVE_KEY = "idleHotelSave";
+export const SAVE_KEY = "idleHotelSave";
 
 export function saveGame() {
   const state = useHotelStore.getState();
@@ -54,14 +61,26 @@ export function saveGame() {
     pendingCleanings: state.pendingCleanings.toString(),
     hiredJuniorReceptionists: state.hiredJuniorReceptionists.toString(),
     hiredJuniorCleaners: state.hiredJuniorCleaners.toString(),
+    buildings: state.buildings.toString(),
     cleaningCycleStartTime: state.cleaningCycleStartTime ?? undefined,
+
+    gameVersion: GAME_VERSION,
+    savedAt: Date.now(),
   };
 
   // 2. Serialize, compress, and save to localStorage.
   const jsonString = JSON.stringify(saveState);
   const compressedString = lz.compressToBase64(jsonString);
   localStorage.setItem(SAVE_KEY, compressedString);
-  console.log("Game Saved!", new Date().toLocaleTimeString());
+  if (saveState.savedAt) {
+    console.log(
+      "Game Saved!",
+      new Date(saveState.savedAt).toLocaleTimeString()
+    );
+    useSettingsStore.getState().setLastSaveAt(saveState.savedAt);
+  }
+
+  return compressedString;
 }
 
 export function loadGame(saveString?: string) {
@@ -96,6 +115,8 @@ export function loadGame(saveString?: string) {
       quadRooms: new Decimal(loadedState.quadRooms ?? 0),
       penthouseRooms: new Decimal(loadedState.penthouseRooms ?? 0),
 
+      buildings: new Decimal(loadedState.buildings ?? 0),
+
       cleanRooms: new Decimal(loadedState.cleanRooms ?? 0),
       occupiedRooms: new Decimal(loadedState.occupiedRooms ?? 0),
       dirtyRooms: new Decimal(loadedState.dirtyRooms ?? 0),
@@ -111,6 +132,10 @@ export function loadGame(saveString?: string) {
         ? now - (offlineTime - loadedState.cleaningCycleStartTime)
         : null,
     });
+
+    if (loadedState.savedAt) {
+      useSettingsStore.getState().setLastSaveAt(loadedState.savedAt);
+    }
 
     // Post-load calculations (like offline income) could go here.
     // For simplicity, we'll skip complex offline income for now.

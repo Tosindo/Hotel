@@ -1,10 +1,9 @@
-import { DoorOpen } from "lucide-react";
 import { useComputedStore } from "../computedStore";
 import { BigButton } from "../core/BigButton";
 import { Tooltip } from "../core/Tooltip";
 import { useHotelStore } from "../hotelStore";
 import { formatNumber } from "../settingsStore";
-import { flex } from "../../styled-system/patterns";
+import { Sprite } from "../core/Sprite";
 
 const CheckInGuestButton: React.FC = () => {
   const cleanRooms = useHotelStore((s) => s.cleanRooms);
@@ -16,15 +15,7 @@ const CheckInGuestButton: React.FC = () => {
         onClick={() => useHotelStore.getState().checkInGuest()}
         disabled={cleanRooms.lte(0)}
       >
-        <div
-          className={flex({
-            width: "full",
-            justifyContent: "center",
-            fontSize: "2xl",
-          })}
-        >
-          <DoorOpen />
-        </div>
+        <Sprite type="checkIn" size={48} />
         Check In Guest ({formatNumber(cleanRooms)}/{formatNumber(totalRooms)})
       </BigButton>
     </Tooltip>

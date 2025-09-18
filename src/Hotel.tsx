@@ -5,13 +5,14 @@ import { UPGRADES, useHotelStore } from "./hotelStore";
 import { useComputedStore } from "./computedStore";
 import { CleanRoomButton } from "./components/CleanRoomButton";
 import { CheckInGuestButton } from "./components/CheckInGuestButton";
-import { Bar } from "./core/Bar";
-import { Clock } from "lucide-react";
 import { TopBar } from "./components/TopBar";
 import { Purchasable } from "./components/Purchasable";
 import { useShallow } from "zustand/shallow";
 import Decimal from "break_infinity.js";
 import { Progress } from "./core/Progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./core/Tabs";
+import { Sprite } from "./core/Sprite";
+import { ScrollArea } from "./core/ScrollArea";
 
 const maxJuniors = new Decimal(10);
 
@@ -168,13 +169,12 @@ const Hotel: React.FC = () => {
       <div
         ref={rootRef}
         className={css({
+          display: "flex",
           position: "relative",
           background: "retro.400",
           width: "full",
           height: "full",
           overflow: "hidden",
-
-          filter: "[url(#fisheye)]",
 
           _after: {
             content: '" "',
@@ -185,7 +185,7 @@ const Hotel: React.FC = () => {
             right: "0",
             height: "[2px]",
             background: "[rgba(0, 0, 0, 0.2)]",
-            zIndex: 2,
+            zIndex: 100,
             pointerEvents: "none",
             animation: "bottomToTop",
           },
@@ -200,7 +200,7 @@ const Hotel: React.FC = () => {
             height: "[200vh]",
             background:
               "[linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06))]",
-            zIndex: 2,
+            zIndex: 100,
             backgroundSize: "100% 2px, 3px 100%",
             pointerEvents: "none",
             animation: "bottomToTop",
@@ -210,6 +210,7 @@ const Hotel: React.FC = () => {
         <div
           className={vstack({
             gap: "0",
+            flexGrow: 1,
           })}
         >
           <TopBar />
@@ -217,6 +218,7 @@ const Hotel: React.FC = () => {
           <div
             className={flex({
               width: "full",
+              flexShrink: 0,
             })}
           >
             <div
@@ -235,7 +237,7 @@ const Hotel: React.FC = () => {
                 background: "retro.800",
               })}
             >
-              <Clock />
+              <Sprite type="clock" size={16} />
               <span
                 className={css({
                   fontWeight: "bold",
@@ -256,7 +258,7 @@ const Hotel: React.FC = () => {
             className={hstack({
               gap: "4",
               padding: "4",
-              py: "8",
+              py: "16",
             })}
           >
             <CheckInGuestButton />
@@ -272,172 +274,242 @@ const Hotel: React.FC = () => {
               alignItems: "flex-start",
               justifyContent: "center",
               flexWrap: "wrap",
+              flexGrow: 1,
+              minHeight: "0", // important for flexbox
             })}
           >
             <section
               className={vstack({
                 gap: "0",
+                height: "full",
                 width: "full",
                 md: {
-                  width: "1/3",
+                  width: "1/2",
                 },
               })}
             >
-              <Bar css={{ fontSize: "lg", fontWeight: "bold", flexShrink: 0 }}>
-                Store:
-              </Bar>
-              <div
-                className={vstack({
-                  width: "full",
-                  gap: "0",
-                  overflowY: "auto",
-                  maxHeight: "[60vh]",
-                })}
-              >
-                <Purchasable
-                  label="Fix single room"
-                  description="A small room for a single guest."
-                  cost={singleRoomPrice}
-                  count={singleRooms}
-                  maxCount={maxSingleRooms}
-                  onPurchase={() => useHotelStore.getState().buyRoom("single")}
-                />
-                <Purchasable
-                  label="Fix double room"
-                  description="A comfortable room for two guests."
-                  cost={doubleRoomPrice}
-                  count={doubleRooms}
-                  maxCount={maxDoubleRooms}
-                  onPurchase={() => useHotelStore.getState().buyRoom("double")}
-                />
-                <Purchasable
-                  label="Fix triple room"
-                  description="A spacious room for three guests."
-                  cost={tripleRoomPrice}
-                  count={tripleRooms}
-                  maxCount={maxTripleRooms}
-                  onPurchase={() => useHotelStore.getState().buyRoom("triple")}
-                />
-                <Purchasable
-                  label="Fix quad room"
-                  description="A large room for four guests."
-                  cost={quadRoomPrice}
-                  count={quadRooms}
-                  maxCount={maxQuadRooms}
-                  onPurchase={() => useHotelStore.getState().buyRoom("quad")}
-                />
-                <Purchasable
-                  label="Fix penthouse room"
-                  description="A luxurious room for five or more guests."
-                  cost={penthouseRoomPrice}
-                  count={penthouseRooms}
-                  maxCount={maxPenthouseRooms}
-                  onPurchase={() =>
-                    useHotelStore.getState().buyRoom("penthouse")
-                  }
-                />
-                <Purchasable
-                  label="Buy adjacent building"
-                  description="We need more space, let's buy the building next door!"
-                  tooltipContent="Each building increases the total number of rooms you can possess."
-                  cost={buildingPrice}
-                  count={buildings}
-                  onPurchase={() => useHotelStore.getState().buyBuilding()}
-                />
-              </div>
+              <Tabs defaultValue="rooms" className={css({ height: "full" })}>
+                <TabsList>
+                  <TabsTrigger value="rooms">Rooms</TabsTrigger>
+                  <TabsTrigger value="services">Services</TabsTrigger>
+                  <TabsTrigger value="buildings">Buildings</TabsTrigger>
+                </TabsList>
+                <TabsContent
+                  value="rooms"
+                  className={css({
+                    maxH: "full",
+                    overflow: "hidden",
+                    display: "flex",
+                    minHeight: "0",
+                  })}
+                >
+                  <ScrollArea className={css({ maxH: "full", w: "full" })}>
+                    <div
+                      className={vstack({
+                        width: "full",
+                        gap: "0",
+                      })}
+                    >
+                      <Purchasable
+                        spriteType="singleRoom"
+                        label="Fix single room"
+                        description="A small room for a single guest."
+                        cost={singleRoomPrice}
+                        count={singleRooms}
+                        maxCount={maxSingleRooms}
+                        onPurchase={() =>
+                          useHotelStore.getState().buyRoom("single")
+                        }
+                      />
+                      <Purchasable
+                        spriteType="doubleRoom"
+                        label="Fix double room"
+                        description="A comfortable room for two guests."
+                        cost={doubleRoomPrice}
+                        count={doubleRooms}
+                        maxCount={maxDoubleRooms}
+                        onPurchase={() =>
+                          useHotelStore.getState().buyRoom("double")
+                        }
+                      />
+                      <Purchasable
+                        spriteType="tripleRoom"
+                        label="Fix triple room"
+                        description="A spacious room for three guests."
+                        cost={tripleRoomPrice}
+                        count={tripleRooms}
+                        maxCount={maxTripleRooms}
+                        onPurchase={() =>
+                          useHotelStore.getState().buyRoom("triple")
+                        }
+                      />
+                      <Purchasable
+                        spriteType="quadRoom"
+                        label="Fix quad room"
+                        description="A large room for four guests."
+                        cost={quadRoomPrice}
+                        count={quadRooms}
+                        maxCount={maxQuadRooms}
+                        onPurchase={() =>
+                          useHotelStore.getState().buyRoom("quad")
+                        }
+                      />
+                      <Purchasable
+                        spriteType="penthouseRoom"
+                        label="Fix penthouse room"
+                        description="A luxurious room for five or more guests."
+                        cost={penthouseRoomPrice}
+                        count={penthouseRooms}
+                        maxCount={maxPenthouseRooms}
+                        onPurchase={() =>
+                          useHotelStore.getState().buyRoom("penthouse")
+                        }
+                      />
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+                <TabsContent value="services">Not yet available :(</TabsContent>
+                <TabsContent
+                  value="buildings"
+                  className={css({
+                    maxH: "full",
+                    overflow: "hidden",
+                    display: "flex",
+                    minHeight: "0",
+                  })}
+                >
+                  <ScrollArea className={css({ maxH: "full", w: "full" })}>
+                    <div
+                      className={vstack({
+                        width: "full",
+                        gap: "0",
+                      })}
+                    >
+                      <Purchasable
+                        label="Buy adjacent building"
+                        description="We need more space, let's buy the building next door!"
+                        tooltipContent="Each building increases the total number of rooms you can possess."
+                        cost={buildingPrice}
+                        count={buildings}
+                        onPurchase={() =>
+                          useHotelStore.getState().buyBuilding()
+                        }
+                      />
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+              </Tabs>
             </section>
 
             <section
               className={vstack({
                 gap: "0",
                 width: "full",
+                height: "full",
                 md: {
-                  width: "1/3",
+                  width: "1/2",
                 },
               })}
             >
-              <Bar css={{ fontSize: "lg", fontWeight: "bold", flexShrink: 0 }}>
-                Staff:
-              </Bar>
-
-              <div
-                className={vstack({
-                  width: "full",
-                  gap: "0",
-                  overflowY: "auto",
-                  maxHeight: "[60vh]",
-                })}
-              >
-                <Purchasable
-                  label="Hire junior receptionist"
-                  description="A good for nothing junior receptionist to check in guests for you, don't expect much."
-                  cost={juniorReceptionistPrice}
-                  count={hiredJuniorReceptionists}
-                  maxCount={maxJuniors}
-                  onPurchase={() =>
-                    useHotelStore.getState().hireJuniorReceptionist()
-                  }
-                />
-                <Purchasable
-                  label="Hire junior cleaner"
-                  description="A junior cleaner, you feel like the rooms are dirtyer when they leave, but the guests seem happy enough."
-                  cost={juniorCleanerPrice}
-                  count={hiredJuniorCleaners}
-                  maxCount={maxJuniors}
-                  onPurchase={() =>
-                    useHotelStore.getState().hireJuniorCleaner()
-                  }
-                />
-                <Purchasable
-                  label="Hire receptionist"
-                  description="A friendly receptionist to check in guests."
-                  cost={receptionistPrice}
-                  count={hiredReceptionists}
-                  onPurchase={() => useHotelStore.getState().hireReceptionist()}
-                />
-                <Purchasable
-                  label="Hire cleaner"
-                  description="A friendly cleaner to keep the rooms tidy."
-                  cost={cleanerPrice}
-                  count={hiredCleaners}
-                  onPurchase={() => useHotelStore.getState().hireCleaner()}
-                />
-              </div>
-            </section>
-            <section
-              className={vstack({
-                gap: "0",
-                width: "full",
-                md: { width: "1/3" },
-                overflowY: "auto",
-                maxHeight: "[60vh]",
-              })}
-            >
-              <Bar css={{ fontSize: "lg", fontWeight: "bold", flexShrink: 0 }}>
-                Upgrades:
-              </Bar>
-              <div
-                className={vstack({
-                  width: "full",
-                  gap: "0",
-                  overflowY: "auto",
-                  maxHeight: "[60vh]",
-                })}
-              >
-                {UPGRADES.map((upgrade) => (
-                  <Purchasable
-                    key={upgrade.name}
-                    label={upgrade.name}
-                    description={upgrade.description}
-                    cost={upgrade.cost}
-                    onPurchase={() =>
-                      useHotelStore.getState().buyUpgrade(upgrade)
-                    }
-                    purchased={purchasedUpgrades.includes(upgrade.key)}
-                    tooltipContent={upgrade.detail}
-                  />
-                ))}
-              </div>
+              <Tabs defaultValue="staff" className={css({ height: "full" })}>
+                <TabsList>
+                  <TabsTrigger value="staff">Staff</TabsTrigger>
+                  <TabsTrigger value="upgrades">Upgrades</TabsTrigger>
+                </TabsList>
+                <TabsContent
+                  value="staff"
+                  className={css({
+                    maxH: "full",
+                    overflow: "hidden",
+                    display: "flex",
+                    minHeight: "0",
+                  })}
+                >
+                  <ScrollArea className={css({ maxH: "full", w: "full" })}>
+                    <div
+                      className={vstack({
+                        width: "full",
+                        gap: "0",
+                      })}
+                    >
+                      <Purchasable
+                        spriteType="juniorReceptionist"
+                        label="Hire junior receptionist"
+                        description="A good for nothing junior receptionist to check in guests for you, don't expect much."
+                        cost={juniorReceptionistPrice}
+                        count={hiredJuniorReceptionists}
+                        maxCount={maxJuniors}
+                        onPurchase={() =>
+                          useHotelStore.getState().hireJuniorReceptionist()
+                        }
+                      />
+                      <Purchasable
+                        spriteType="juniorCleaner"
+                        label="Hire junior cleaner"
+                        description="A junior cleaner, you feel like the rooms are dirtyer when they leave, but the guests seem happy enough."
+                        cost={juniorCleanerPrice}
+                        count={hiredJuniorCleaners}
+                        maxCount={maxJuniors}
+                        onPurchase={() =>
+                          useHotelStore.getState().hireJuniorCleaner()
+                        }
+                      />
+                      <Purchasable
+                        spriteType="receptionist"
+                        label="Hire receptionist"
+                        description="A friendly receptionist to check in guests."
+                        cost={receptionistPrice}
+                        count={hiredReceptionists}
+                        onPurchase={() =>
+                          useHotelStore.getState().hireReceptionist()
+                        }
+                      />
+                      <Purchasable
+                        spriteType="cleaner"
+                        label="Hire cleaner"
+                        description="A friendly cleaner to keep the rooms tidy."
+                        cost={cleanerPrice}
+                        count={hiredCleaners}
+                        onPurchase={() =>
+                          useHotelStore.getState().hireCleaner()
+                        }
+                      />
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+                <TabsContent
+                  value="upgrades"
+                  className={css({
+                    maxHeight: "full",
+                    overflow: "hidden",
+                    display: "flex",
+                    minHeight: "0",
+                  })}
+                >
+                  <ScrollArea className={css({ maxH: "full", w: "full" })}>
+                    <div
+                      className={vstack({
+                        width: "full",
+                        gap: "0",
+                      })}
+                    >
+                      {UPGRADES.map((upgrade) => (
+                        <Purchasable
+                          key={upgrade.name}
+                          label={upgrade.name}
+                          description={upgrade.description}
+                          cost={upgrade.cost}
+                          onPurchase={() =>
+                            useHotelStore.getState().buyUpgrade(upgrade)
+                          }
+                          purchased={purchasedUpgrades.includes(upgrade.key)}
+                          tooltipContent={upgrade.detail}
+                        />
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+              </Tabs>
             </section>
           </div>
         </div>
