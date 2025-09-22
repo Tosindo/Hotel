@@ -9,15 +9,26 @@ import {
   DialogTrigger,
 } from "../core/Dialog";
 import { Sprite } from "../core/Sprite";
-import { loadGame, SAVE_KEY, saveGame } from "../saveManager";
 import { useSettingsStore } from "../settingsStore";
 import { GAME_VERSION } from "../config";
+import {
+  getGameStateFromCompressedString,
+  SAVE_KEY,
+  saveGameStateToLocalStorage,
+} from "../utils/saveManager";
+import { useEngine } from "../engine/EngineContext";
 
 const Settings: React.FC = () => {
+  const engine = useEngine();
   const lastSaveAt = useSettingsStore((state) => state.lastSaveAt);
 
+  const onSaveGame = () => {
+    const saveString = saveGameStateToLocalStorage(engine.getSaveGameState());
+    return saveString;
+  };
+
   const onCopySave = () => {
-    const saveString = saveGame();
+    const saveString = onSaveGame();
     if (saveString) {
       navigator.clipboard.writeText(saveString).then(
         () => {
@@ -35,7 +46,11 @@ const Settings: React.FC = () => {
   const onLoad = () => {
     const saveString = prompt("Paste your save data here:");
     if (saveString) {
-      loadGame(saveString);
+      const saveState = getGameStateFromCompressedString(saveString);
+      if (!saveState) return;
+
+      // @TODO - validate save string before loading
+      engine.loadGameState(saveState);
     }
   };
 
@@ -48,7 +63,7 @@ const Settings: React.FC = () => {
 
   return (
     <Dialog>
-      <DialogTrigger className={css({ marginLeft: "auto" })}>
+      <DialogTrigger className={css({ marginLeft: "auto" })} asChild>
         <Button variant="dark">
           <Sprite type="settings" size={28} />
         </Button>
@@ -59,7 +74,7 @@ const Settings: React.FC = () => {
           Last save:{" "}
           {lastSaveAt ? dayjs(lastSaveAt).format("YYYY-MM-DD HH:mm:ss") : "N/A"}
         </DialogDescription>
-        <Button onClick={() => saveGame()}>Save</Button>
+        <Button onClick={() => onSaveGame()}>Save</Button>
         <Button onClick={onLoad}>Load</Button>
         <Button onClick={onCopySave}>Copy Save</Button>
         <Button variant="danger" onClick={hardReset}>

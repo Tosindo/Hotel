@@ -107,7 +107,8 @@ const DialogContent: React.FC<
       >
         {children}
         {showCloseButton && (
-          <DialogClose
+          <Button
+            as={DialogClose}
             className={css({
               position: "absolute",
               top: "4",
@@ -116,12 +117,11 @@ const DialogContent: React.FC<
               transition: "opacity",
               _hover: { opacity: 1 },
             })}
+            size="sm"
           >
-            <Button size="sm">
-              <Sprite type="close" size={18} />
-            </Button>
+            <Sprite type="close" size={18} />
             <span className={srOnly()}>Close</span>
-          </DialogClose>
+          </Button>
         )}
       </DialogPrimitive.Content>
     </DialogPortal>

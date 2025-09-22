@@ -39,6 +39,7 @@ const formatNumber = (
   return formatter.formatShort(num, {
     sigfigs: 5,
     maxSmall: simple ? 0 : 1000,
+    minSuffix: simple ? 1e3 : 0,
   });
 };
 

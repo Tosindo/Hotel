@@ -46,6 +46,7 @@ const styles = css.raw({
   py: "1.5",
   fontSize: "md",
   textWrap: "balance",
+  maxWidth: "xs",
   _closed: {
     opacity: 0,
   },

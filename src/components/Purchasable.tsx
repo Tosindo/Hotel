@@ -1,37 +1,69 @@
-import type Decimal from "break_infinity.js";
 import { Bar } from "../core/Bar";
 import { Button } from "../core/Button";
 import { formatNumber } from "../settingsStore";
 import { Tooltip } from "../core/Tooltip";
-import { useHotelStore } from "../hotelStore";
 import { vstack } from "../../styled-system/patterns";
 import { css } from "../../styled-system/css";
-import { Sprite, type SpriteType } from "../core/Sprite";
+import { Sprite } from "../core/Sprite";
+import type { UnitBlueprint } from "../engine/types";
+import { useEngineSelector } from "../engine/useEngineSelector";
+import { useMoney } from "../hooks/useMoney";
+import { useMemo } from "react";
+import { useEngine } from "../engine/EngineContext";
+import { Global } from "../units/Global";
+import { DecimalZero } from "../engine/constants";
+import useDisplayable from "../hooks/useDisplayable";
 
 interface PurchasablesProps {
-  spriteType?: SpriteType;
-  label: string;
-  description?: string;
-  tooltipContent?: string;
-  count?: Decimal;
-  maxCount?: Decimal;
-  cost: Decimal;
-  onPurchase: () => void;
-  purchased?: boolean;
+  unit: UnitBlueprint;
 }
 
-export const Purchasable: React.FC<PurchasablesProps> = ({
-  label,
-  description,
-  count,
-  maxCount,
-  cost,
-  onPurchase,
-  tooltipContent = "",
-  purchased = false,
-  spriteType = "unknown",
-}) => {
-  const money = useHotelStore((s) => s.money);
+export const Purchasable: React.FC<PurchasablesProps> = ({ unit }) => {
+  const engine = useEngine();
+  const {
+    name,
+    description,
+    sprite: spriteType,
+    tooltipContent,
+  } = useDisplayable(unit);
+
+  const money = useMoney();
+
+  const count = useEngineSelector(
+    [unit.key.getCountKey()],
+    (engine) => () => engine.getUnitCount(unit.key)
+  );
+
+  const cost = useEngineSelector(
+    [unit.key.getComputedValueKey("cost")],
+    (engine) => () => engine.getComputedDecimal(unit.key, "cost")
+  );
+
+  const max = useEngineSelector(
+    [unit.key.getComputedValueKey("max")],
+    (engine) => () =>
+      engine.hasComputedValue(unit.key, "max")
+        ? engine.getComputedDecimal(unit.key, "max")
+        : undefined
+  );
+
+  const purchased = useMemo(() => {
+    if (!max) return false;
+
+    return count.eq(max);
+  }, [count, max]);
+
+  const singlePurchased = unit.metadata?.singlePurchase === true && purchased;
+
+  const isDisabled =
+    purchased ||
+    (cost.gt(DecimalZero) && money.lt(cost)) ||
+    (max && count && count.gte(max));
+
+  const onPurchase = () => {
+    if (isDisabled) return;
+    engine.dispatchAction(Global.key, "purchaseUnit", unit, 1);
+  };
 
   return (
     <Tooltip content={tooltipContent} side="bottom">
@@ -45,6 +77,9 @@ export const Purchasable: React.FC<PurchasablesProps> = ({
           _last: {
             borderBottom: "none",
           },
+        }}
+        style={{
+          opacity: singlePurchased ? 0.5 : 1,
         }}
       >
         <div
@@ -65,9 +100,10 @@ export const Purchasable: React.FC<PurchasablesProps> = ({
         </div>
         <div className={vstack({ gap: "1", alignItems: "flex-start" })}>
           <span className={css({ fontSize: "md", fontWeight: "bold" })}>
-            {label}{" "}
-            {count &&
-              `(${formatNumber(count)}${maxCount ? `/${formatNumber(maxCount)}` : ""})`}
+            {name}{" "}
+            {unit.metadata?.singlePurchase !== true &&
+              count &&
+              `(${formatNumber(count)}${max ? `/${formatNumber(max)}` : ""})`}
           </span>
           {description && (
             <span
@@ -91,11 +127,7 @@ export const Purchasable: React.FC<PurchasablesProps> = ({
         >
           <Button
             onClick={onPurchase}
-            disabled={
-              purchased ||
-              money.lt(cost) ||
-              (maxCount && count && count.gte(maxCount))
-            }
+            disabled={isDisabled}
             css={{
               whiteSpace: "nowrap",
             }}
@@ -104,7 +136,7 @@ export const Purchasable: React.FC<PurchasablesProps> = ({
               <Sprite type="check" size={16} />
             ) : (
               <>
-                {formatNumber(cost, false)}
+                {formatNumber(cost)}
                 <Sprite type="bankNote" size={16} />
               </>
             )}

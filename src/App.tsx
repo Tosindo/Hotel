@@ -1,7 +1,9 @@
-import { useEffect } from "react";
+import { useState } from "react";
 import { css } from "../styled-system/css";
 import { Hotel } from "./Hotel";
-import { loadGame, saveGame } from "./saveManager";
+import { Engine } from "./engine/Engine";
+import { blueprints } from "./config";
+import { EngineProvider } from "./engine/EngineProvider";
 
 const styles = css({
   width: "screen",
@@ -14,21 +16,13 @@ const styles = css({
 });
 
 function App() {
-  useEffect(() => {
-    loadGame();
-  }, []);
-
-  useEffect(() => {
-    const saveInterval = setInterval(() => {
-      saveGame();
-    }, 10000);
-
-    return () => clearInterval(saveInterval);
-  }, []);
+  const [engine] = useState(() => new Engine(blueprints));
 
   return (
     <div className={styles}>
-      <Hotel />
+      <EngineProvider engine={engine}>
+        <Hotel />
+      </EngineProvider>
     </div>
   );
 }
