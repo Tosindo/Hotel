@@ -1,4 +1,3 @@
-import { Bar } from "../core/Bar";
 import { Button } from "../core/Button";
 import { formatNumber } from "../settingsStore";
 import { Tooltip } from "../core/Tooltip";
@@ -10,7 +9,7 @@ import { useEngineSelector } from "../engine/useEngineSelector";
 import { useMoney } from "../hooks/useMoney";
 import { useMemo } from "react";
 import { useEngine } from "../engine/EngineContext";
-import { Global } from "../units/Global";
+import { Global } from "../units/System/Global";
 import { DecimalZero } from "../engine/constants";
 import useDisplayable from "../hooks/useDisplayable";
 
@@ -53,8 +52,6 @@ export const Purchasable: React.FC<PurchasablesProps> = ({ unit }) => {
     return count.eq(max);
   }, [count, max]);
 
-  const singlePurchased = unit.metadata?.singlePurchase === true && purchased;
-
   const isDisabled =
     purchased ||
     (cost.gt(DecimalZero) && money.lt(cost)) ||
@@ -65,75 +62,91 @@ export const Purchasable: React.FC<PurchasablesProps> = ({ unit }) => {
     engine.dispatchAction(Global.key, "purchaseUnit", unit, 1);
   };
 
+  const customPurchaseText =
+    unit.metadata?.customPurchaseText &&
+    typeof unit.metadata.customPurchaseText === "string"
+      ? unit.metadata.customPurchaseText
+      : undefined;
+
   return (
     <Tooltip content={tooltipContent} side="bottom">
-      <Bar
-        variant="lighter"
-        css={{
+      <div
+        className={css({
+          display: "flex",
+          flexDirection: "column",
           gap: "4",
           flexShrink: 0,
-          border: "none",
-          borderBottom: "retro-border-xs",
-          _last: {
-            borderBottom: "none",
-          },
-        }}
+          border: "retro-border",
+          borderColor: "retro.700",
+          padding: "2",
+          backgroundColor: "retro.200",
+          width: "full",
+        })}
         style={{
-          opacity: singlePurchased ? 0.5 : 1,
+          opacity: purchased ? 0.5 : 1,
         }}
       >
-        <div
-          className={css({
-            border: "retro-border",
-            padding: "1",
-            borderColor: "retro.700",
-            w: "[48px]",
-            h: "[48px]",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            alignSelf: "flex-start",
-            color: "retro.700",
-          })}
-        >
-          <Sprite type={spriteType} size={32} />
-        </div>
-        <div className={vstack({ gap: "1", alignItems: "flex-start" })}>
-          <span className={css({ fontSize: "md", fontWeight: "bold" })}>
-            {name}{" "}
-            {unit.metadata?.singlePurchase !== true &&
-              count &&
-              `(${formatNumber(count)}${max ? `/${formatNumber(max)}` : ""})`}
-          </span>
-          {description && (
+        <div className={css({ display: "flex", gap: "4" })}>
+          <div
+            className={css({
+              border: "retro-border",
+              padding: "1",
+              borderColor: "retro.700",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              alignSelf: "flex-start",
+              color: "retro.700",
+            })}
+          >
+            <Sprite type={spriteType} size={64} />
+          </div>
+          <div className={vstack({ gap: "1", alignItems: "flex-start" })}>
             <span
               className={css({
-                fontSize: "sm",
+                fontSize: "lg",
                 fontWeight: "bold",
                 color: "retro.900",
               })}
             >
-              {description}
+              {name}{" "}
+              {unit.metadata?.singlePurchase !== true &&
+                count &&
+                `(${formatNumber(count)}${max ? `/${formatNumber(max)}` : ""})`}
             </span>
-          )}
+            {description && (
+              <span
+                className={css({
+                  fontSize: "sm",
+                  fontWeight: "bold",
+                  color: "retro.900",
+                })}
+              >
+                {description}
+              </span>
+            )}
+          </div>
         </div>
         <div
           className={css({
             display: "flex",
-            alignItems: "flex-end",
-            height: "full",
-            marginLeft: "auto",
+            width: "full",
           })}
         >
           <Button
             onClick={onPurchase}
             disabled={isDisabled}
+            data-cursor={isDisabled ? "not-allowed" : "cart"}
+            size="lg"
             css={{
               whiteSpace: "nowrap",
+              width: "full",
             }}
           >
             {purchased ? (
               <Sprite type="check" size={16} />
+            ) : customPurchaseText ? (
+              customPurchaseText
             ) : (
               <>
                 {formatNumber(cost)}
@@ -142,7 +155,7 @@ export const Purchasable: React.FC<PurchasablesProps> = ({ unit }) => {
             )}
           </Button>
         </div>
-      </Bar>
+      </div>
     </Tooltip>
   );
 };

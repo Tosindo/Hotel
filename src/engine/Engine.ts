@@ -15,8 +15,12 @@ import { GAME_VERSION } from "../config";
 import { DecimalZero } from "./constants";
 import { validateNodeType } from "./validateNodeType";
 import { getDefaultNodeValue } from "./getDefaultNodeValue";
+import { MersenneTwister19937, type Engine as RandomEngine } from "random-js";
 
 class Engine {
+  seed: number;
+  randomEngine: RandomEngine;
+
   blueprints: UnitBlueprint[];
   blueprintMap: Map<string, UnitBlueprint> = new Map();
   blueprintsWithTick: string[] = [];
@@ -39,6 +43,9 @@ class Engine {
   lastTickTime: number;
 
   constructor(blueprints: UnitBlueprint[]) {
+    this.seed = Date.now() + Math.floor(Math.random() + 1_000_000);
+    this.randomEngine = MersenneTwister19937.seed(this.seed);
+
     this.blueprints = blueprints;
 
     this.ownedUnits = {};
@@ -74,6 +81,9 @@ class Engine {
       actionValues: this.actionValues,
       nodes: this.nodes,
       blueprints: this.blueprints,
+
+      seed: this.seed,
+      randomEngine: this.randomEngine,
     };
   }
 
@@ -612,6 +622,9 @@ class Engine {
       lastTickTime: this.lastTickTime,
       gameVersion: GAME_VERSION,
       lastSavedTime: Date.now(),
+      seed: this.seed,
+      // Note: We do not save computedValues, actionValues, nodes, blueprints, or randomEngine
+      // as they can be reconstructed from the other data.
     };
   }
 
@@ -619,6 +632,10 @@ class Engine {
     this.ownedUnits = saveState.ownedUnits;
     this.unitStates = saveState.unitStates;
     this.lastTickTime = saveState.lastTickTime;
+    this.seed = saveState.seed || this.seed;
+    this.randomEngine = saveState.seed
+      ? MersenneTwister19937.seed(saveState.seed)
+      : this.randomEngine;
 
     this.computeAllValues();
 

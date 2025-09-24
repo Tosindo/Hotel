@@ -4,10 +4,11 @@ import { Sprite } from "../core/Sprite";
 import { Settings } from "./Settings";
 import { useMoney } from "../hooks/useMoney";
 import { useEngineSelector } from "../engine/useEngineSelector";
-import { Global } from "../units/Global";
+import { Global } from "../units/System/Global";
 import { Cleaning } from "../units/Staff/Cleaning";
 import { Receptionist } from "../units/Staff/Receptionist";
 import { DecimalZero } from "../engine/constants";
+import { PenAndPaper } from "../units/Services/PenAndPaper";
 
 const TopBar: React.FC = () => {
   const money = useMoney();
@@ -26,6 +27,16 @@ const TopBar: React.FC = () => {
     (engine) => () => engine.getComputedDecimal(Receptionist.key, "checkInRate")
   );
 
+  const showAvailableGuests = useEngineSelector(
+    [PenAndPaper.key.getCountKey()],
+    (engine) => () => engine.getUnitCount(PenAndPaper.key).gt(0)
+  );
+
+  const availableGuests = useEngineSelector(
+    [Global.key.getStateValueKey("availableGuests")],
+    (engine) => () => engine.getStateValue(Global.key, "availableGuests")
+  );
+
   return (
     <Bar variant="light" css={{ p: "1", gap: "2", flexShrink: 0 }}>
       <BarStat
@@ -42,6 +53,16 @@ const TopBar: React.FC = () => {
       >
         {formatNumber(incomePerSecond, false)}/s
       </BarStat>
+
+      {showAvailableGuests && (
+        <BarStat
+          css={{ width: "44" }}
+          icon={<Sprite type="people" size={32} />}
+          tooltipContent="Available Guests"
+        >
+          {formatNumber(availableGuests, false)}
+        </BarStat>
+      )}
 
       {checkInRate.gt(DecimalZero) && (
         <BarStat

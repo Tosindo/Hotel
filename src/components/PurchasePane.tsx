@@ -12,7 +12,8 @@ const PurchasePane: React.FC<UseListUnitsOptions> = ({ type, sortBy }) => {
     <div
       className={vstack({
         width: "full",
-        gap: "0",
+        gap: "3",
+        padding: "2",
       })}
     >
       {units.map((unit) => (

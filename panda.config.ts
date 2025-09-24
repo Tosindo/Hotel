@@ -41,6 +41,14 @@ export default defineConfig({
           to: { transform: "translate3d(0, 0vh, 0)" },
         },
 
+        broomCursorAnimation: {
+          "0%": { transform: "rotate(60deg) scaleX(-1)" },
+          "30%": { transform: "rotate(-30deg) scaleX(-1) skewY(-10deg)" },
+          "50%": { transform: "rotate(-90deg) scaleX(1) skewY(10deg)" },
+          "80%": { transform: "rotate(60deg) scaleX(1) skewY(0deg)" },
+          "100%": { transform: "rotate(60deg) scaleX(-1)" },
+        },
+
         crtTextShadow: {
           "0%": {
             textShadow:
@@ -135,6 +143,9 @@ export default defineConfig({
           },
           bottomToTop: {
             value: "bottomToTop 8s linear infinite",
+          },
+          broomCursorAnimation: {
+            value: "broomCursorAnimation 0.8s linear infinite",
           },
         },
         colors: {

@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useEngineSelector } from "../engine/useEngineSelector";
-import { UnlockManager } from "../units/UnlockManager";
+import { UnlockManager } from "../units/System/UnlockManager";
 
 const useUnlockedUnits = () => {
   const unlockedUnits = useEngineSelector(

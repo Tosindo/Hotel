@@ -4,7 +4,7 @@ import { UnitType } from "../../engine/types";
 import { createValueNode } from "../../engine/createCalculationNode";
 import { NODE_PRIORITY } from "../../priorities";
 import { DecimalOne, DecimalZero } from "../../engine/constants";
-import { Global } from "../Global";
+import { Global } from "../System/Global";
 
 const Cleaning = createUnitBlueprint("cleaning", {
   type: UnitType.SYSTEM,

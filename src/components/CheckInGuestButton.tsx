@@ -3,13 +3,18 @@ import { Tooltip } from "../core/Tooltip";
 import { formatNumber } from "../settingsStore";
 import { Sprite } from "../core/Sprite";
 import { useEngineSelector } from "../engine/useEngineSelector";
-import { Global } from "../units/Global";
+import { Global } from "../units/System/Global";
 import { useEngine } from "../engine/EngineContext";
 import { Receptionist } from "../units/Staff/Receptionist";
 import { Progress } from "../core/Progress";
 
 const CheckInGuestButton: React.FC = () => {
   const engine = useEngine();
+
+  const unlockedCheckIn = useEngineSelector(
+    [Global.key.getComputedValueKey("unlockedCheckIn")],
+    (engine) => () => engine.getComputedBoolean(Global.key, "unlockedCheckIn")
+  );
 
   const cleanRooms = useEngineSelector(
     [Global.key.getComputedValueKey("cleanRooms")],
@@ -24,6 +29,8 @@ const CheckInGuestButton: React.FC = () => {
     [Receptionist.key.getStateValueKey("pendingCheckIns")],
     (engine) => () => engine.getStateValue(Receptionist.key, "pendingCheckIns")
   );
+
+  if (!unlockedCheckIn) return null;
 
   return (
     <Tooltip content="Check in a guest to a clean room" side="bottom">

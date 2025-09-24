@@ -62,6 +62,7 @@ const DialogOverlay: React.FC<
           zIndex: 50,
           bg: "retro.900",
           opacity: 0.4,
+          cursor: "none",
         }),
         className
       )}
@@ -99,6 +100,7 @@ const DialogContent: React.FC<
             y: "-1/2",
             translate: "auto",
             gap: "4",
+            cursor: "none",
             p: "8",
           }),
           className

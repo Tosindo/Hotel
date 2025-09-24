@@ -25,6 +25,8 @@
     "lucide-react": "^0.544.0",
     "lz-string": "^1.5.0",
     "motion": "^12.23.12",
+    "perfect-cursors": "^1.0.5",
+    "random-js": "^2.1.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "swarm-numberformat": "^0.4.0",

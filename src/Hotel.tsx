@@ -10,6 +10,8 @@ import DayProgress from "./components/DayProgress";
 import { Store } from "./components/Store";
 import { useEngine } from "./engine/EngineContext";
 import { useAutosave } from "./hooks/useAutosave";
+import { Cursor } from "./components/Cursor";
+import { HandOutFlyersButton } from "./components/HandOutFlyersButton";
 
 declare global {
   interface Window {
@@ -84,6 +86,7 @@ const Hotel: React.FC = () => {
   return (
     <>
       <audio src="/click.wav" preload="auto" ref={buttonClickAudioRef} />
+      <Cursor />
       <div
         ref={rootRef}
         className={css({
@@ -93,6 +96,7 @@ const Hotel: React.FC = () => {
           width: "full",
           height: "full",
           overflow: "hidden",
+          cursor: "[none !important]",
 
           _after: {
             content: '" "',
@@ -141,6 +145,7 @@ const Hotel: React.FC = () => {
               py: "16",
             })}
           >
+            <HandOutFlyersButton />
             <CheckInGuestButton />
             <CleanRoomButton />
           </div>

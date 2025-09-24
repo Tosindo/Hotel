@@ -1,8 +1,8 @@
-import { DecimalOne, DecimalZero } from "../engine/constants";
-import { createUnitBlueprint } from "../engine/createUnitBlueprint";
-import { UnitType, type GameState } from "../engine/types";
-import type { UnitKey } from "../engine/UnitKey";
-import { isFunction } from "../utils/guards";
+import { DecimalOne, DecimalZero } from "../../engine/constants";
+import { createUnitBlueprint } from "../../engine/createUnitBlueprint";
+import { UnitType, type GameState } from "../../engine/types";
+import type { UnitKey } from "../../engine/UnitKey";
+import { isFunction } from "../../utils/guards";
 import { Global } from "./Global";
 
 export const defaultUnlockCondition =
@@ -11,6 +11,11 @@ export const defaultUnlockCondition =
     const owned = key.getCount(state);
     const cost = key.getComputedDecimal(state, "cost");
     const money = Global.key.getState(state)?.money ?? DecimalZero;
+    const max = key.hasComputedValue(state, "max")
+      ? key.getComputedDecimal(state, "max")
+      : null;
+
+    if (max && max.eq(0)) return false;
 
     return (
       (owned.gt(0) || cost.lte(DecimalZero) || money.gte(cost)) &&

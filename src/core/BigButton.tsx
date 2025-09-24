@@ -18,7 +18,7 @@ const styles = css({
   "& svg": {
     fontSize: "2xl",
   },
-  cursor: "pointer",
+  "--cursor": "pointer",
   translate: "auto",
   _hover: {
     scale: "[105%]",
@@ -28,14 +28,14 @@ const styles = css({
   },
   _disabled: {
     opacity: "0.6",
-    cursor: "not-allowed",
+    "--cursor": "not-allowed",
     _hover: {
       scale: "auto",
     },
   },
   _loading: {
     opacity: "1",
-    cursor: "wait",
+    "--cursor": "wait",
   },
   transition: "all",
   transitionDuration: "fast",

@@ -1,5 +1,5 @@
 import { useEngineSelector } from "../engine/useEngineSelector";
-import { Global } from "../units/Global";
+import { Global } from "../units/System/Global";
 
 const useMoney = () => {
   return useEngineSelector(

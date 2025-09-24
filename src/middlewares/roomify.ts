@@ -11,7 +11,7 @@ import {
   createModifierNode,
   createValueNode,
 } from "../engine/createCalculationNode";
-import { Global } from "../units/Global";
+import { Global } from "../units/System/Global";
 import { DecimalZero } from "../engine/constants";
 import { NODE_PRIORITY } from "../priorities";
 

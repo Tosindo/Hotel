@@ -1,5 +1,6 @@
 import type Decimal from "break_infinity.js";
 import type { UnitKey } from "./UnitKey";
+import { type Engine as RandomEngine } from "random-js";
 
 export type ComputableValue = Decimal | number | boolean | string | null;
 
@@ -214,12 +215,15 @@ export interface GameState {
   blueprints: UnitBlueprint[];
 
   lastTickTime: number;
+
+  seed: number;
+  randomEngine: RandomEngine;
 }
 
 export interface SaveGameState
   extends Omit<
     GameState,
-    "computedValues" | "actionValues" | "nodes" | "blueprints"
+    "computedValues" | "actionValues" | "nodes" | "blueprints" | "randomEngine"
   > {
   gameVersion: string;
   lastSavedTime: number;

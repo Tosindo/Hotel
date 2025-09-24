@@ -1,11 +1,14 @@
 import Decimal from "break_infinity.js";
-import { createUnitBlueprint } from "../engine/createUnitBlueprint";
-import { createValueNode } from "../engine/createCalculationNode";
-import { UnitType, type UnitBlueprint } from "../engine/types";
-import { DecimalOne, DecimalZero, NumberZero } from "../engine/constants";
-import { NODE_PRIORITY } from "../priorities";
+import { createUnitBlueprint } from "../../engine/createUnitBlueprint";
+import { createValueNode } from "../../engine/createCalculationNode";
+import { UnitType, type UnitBlueprint } from "../../engine/types";
+import { DecimalOne, DecimalZero, NumberZero } from "../../engine/constants";
+import { NODE_PRIORITY } from "../../priorities";
+import { Stats } from "./Stats";
+import dayjs from "dayjs";
 
 const StartingMoney = new Decimal(-13);
+const LoreStartingDay = "1980-08-20 00:00:00";
 
 const Global = createUnitBlueprint("global", {
   type: UnitType.SYSTEM,
@@ -16,8 +19,10 @@ const Global = createUnitBlueprint("global", {
       money: StartingMoney,
       occupiedRooms: DecimalZero,
       dirtyRooms: DecimalZero,
+      availableGuests: DecimalZero,
       checkoutCycleStartTime: Date.now(),
       cleaningCycleStartTime: null as number | null,
+      day: DecimalZero,
     };
   },
 
@@ -26,7 +31,7 @@ const Global = createUnitBlueprint("global", {
       checkoutCycleDuration: createValueNode({
         priority: NODE_PRIORITY.INITIAL,
         returnType: "number",
-        calculate: () => 30000,
+        calculate: () => 60 * 1000 * 2,
       }),
       cleanRoomDuration: createValueNode({
         priority: NODE_PRIORITY.INITIAL,
@@ -148,7 +153,7 @@ const Global = createUnitBlueprint("global", {
       }),
 
       cleaningProgress: createValueNode({
-        priority: -NODE_PRIORITY.LOW_PRIORITY,
+        priority: NODE_PRIORITY.LOW_PRIORITY,
         dependencies: [
           key.getStateValueKey("cleaningCycleStartTime"),
           key.getComputedValueKey("cleanRoomDuration"),
@@ -171,13 +176,89 @@ const Global = createUnitBlueprint("global", {
           return Math.min(elapsedTime / cleanRoomDuration, 1);
         },
       }),
+
+      unlockedCheckIn: createValueNode({
+        priority: NODE_PRIORITY.INITIAL,
+        returnType: "boolean",
+        calculate: () => false,
+      }),
+
+      canCheckIn: createValueNode({
+        priority: NODE_PRIORITY.INITIAL,
+        dependencies: [
+          key.getComputedValueKey("cleanRooms"),
+          key.getStateValueKey("availableGuests"),
+          key.getComputedValueKey("unlockedCheckIn"),
+        ],
+        returnType: "boolean",
+        calculate: (state) => {
+          const cleanRooms = key.getComputedDecimal(state, "cleanRooms");
+          const unlockedCheckIn = key.getComputedBoolean(
+            state,
+            "unlockedCheckIn"
+          );
+          if (!unlockedCheckIn) return false;
+
+          const availableGuests =
+            key.getState(state)?.availableGuests || DecimalZero;
+
+          return cleanRooms.gt(0) && availableGuests.gt(0);
+        },
+      }),
+
+      unlockedCleaning: createValueNode({
+        priority: NODE_PRIORITY.INITIAL,
+        returnType: "boolean",
+        calculate: () => false,
+      }),
+
+      canStartCleaning: createValueNode({
+        priority: NODE_PRIORITY.INITIAL,
+        dependencies: [
+          key.getStateValueKey("dirtyRooms"),
+          key.getStateValueKey("cleaningCycleStartTime"),
+          key.getComputedValueKey("unlockedCleaning"),
+        ],
+        returnType: "boolean",
+        calculate: (state) => {
+          const dirtyRooms = key.getState(state)?.dirtyRooms || DecimalZero;
+          const cleaningCycleStartTime =
+            key.getState(state)?.cleaningCycleStartTime;
+          const unlockedCleaning = key.getComputedBoolean(
+            state,
+            "unlockedCleaning"
+          );
+          if (!unlockedCleaning) return false;
+
+          return dirtyRooms.gt(0) && cleaningCycleStartTime === null;
+        },
+      }),
+
+      date: createValueNode({
+        priority: NODE_PRIORITY.INITIAL,
+        returnType: "string",
+        dependencies: [key.getStateValueKey("day")],
+        calculate: (state) => {
+          const day = key.getState(state)?.day || DecimalZero;
+          const startDate = dayjs(LoreStartingDay);
+          const currentDate = startDate.add(day.toNumber(), "day");
+          return currentDate.format("DD MMM YYYY");
+        },
+      }),
     };
   },
 
-  getActions(key, getState, { updateState, updateCount }) {
+  getActions(key, getState, mutators) {
+    const { updateState, updateCount } = mutators;
+
     return {
       checkInGuest: () => {
         const gameState = getState();
+        const statsState = Stats.key.getState(gameState);
+
+        const availableGuests =
+          key.getState(gameState)?.availableGuests ?? DecimalZero;
+
         const cleanRooms =
           key.getComputedDecimal(gameState, "cleanRooms") ?? DecimalZero;
         const checkInEfficiency =
@@ -186,6 +267,11 @@ const Global = createUnitBlueprint("global", {
 
         if (cleanRooms.lte(0)) {
           console.warn("No clean rooms available for check-in.");
+          return;
+        }
+
+        if (availableGuests.lte(0)) {
+          console.warn("No available guests to check in.");
           return;
         }
 
@@ -200,9 +286,26 @@ const Global = createUnitBlueprint("global", {
           roomsToCheckIn = cleanRooms;
         }
 
+        if (roomsToCheckIn.gt(availableGuests)) {
+          roomsToCheckIn = availableGuests;
+        }
+
+        if (statsState && !statsState.firstCheckInDone) {
+          updateState(Stats.key, (s) => ({
+            ...s,
+            firstCheckInDone: true,
+          }));
+
+          updateState(Global.key, (s) => ({
+            ...s,
+            checkoutCycleStartTime: Date.now(),
+          }));
+        }
+
         updateState(key, (s) => ({
           ...s,
           occupiedRooms: s.occupiedRooms.add(roomsToCheckIn),
+          availableGuests: s.availableGuests.sub(roomsToCheckIn),
         }));
       },
       startCleaning: () => {
@@ -285,6 +388,11 @@ const Global = createUnitBlueprint("global", {
           money: s.money.sub(cost),
         }));
         updateCount(unit.key, unitCount.add(quantityDecimal));
+
+        const onPurchase = unit.metadata?.onPurchase;
+        if (onPurchase && typeof onPurchase === "function") {
+          onPurchase(gameState, unit, quantityDecimal, mutators);
+        }
       },
     };
   },
@@ -296,6 +404,12 @@ const Global = createUnitBlueprint("global", {
       "checkoutCycleDuration"
     );
     const incomePerSecond = key.getComputedDecimal(state, "incomePerSecond");
+
+    const statsState = Stats.key.getState(state);
+    const firstCheckInDone = statsState?.firstCheckInDone || false;
+    // Before the first check in days don't pass, as that is when the game loop starts for real, previously is just setup
+    if (!firstCheckInDone) return;
+
     if (!globalState || !checkoutCycleDuration || !incomePerSecond) return;
 
     updateComputedStale(key.getComputedValueKey("dailyProgress"));

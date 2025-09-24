@@ -6,7 +6,7 @@ import type {
 } from "../engine/types";
 import type { UnitKey } from "../engine/UnitKey";
 import { createValueNode } from "../engine/createCalculationNode";
-import { UnlockManager } from "../units/UnlockManager";
+import { UnlockManager } from "../units/System/UnlockManager";
 import { NODE_PRIORITY } from "../priorities";
 
 export interface UnlockableOptions {

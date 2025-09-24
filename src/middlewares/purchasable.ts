@@ -2,14 +2,16 @@ import Decimal from "break_infinity.js";
 import type {
   BlueprintConfig,
   DependencyKey,
+  EngineMutators,
   GameState,
   UnitActionsObject,
+  UnitBlueprint,
   UnitNodesObject,
 } from "../engine/types";
 import type { UnitKey } from "../engine/UnitKey";
 import { createValueNode } from "../engine/createCalculationNode";
 import { getMaxAffordable, getTotalCost } from "../utils/geometricProgression";
-import { Global } from "../units/Global";
+import { Global } from "../units/System/Global";
 import { NODE_PRIORITY } from "../priorities";
 
 export interface PurchasableOptions {
@@ -41,6 +43,14 @@ export interface PurchasableOptions {
   maxDependencies?: (key: UnitKey) => DependencyKey[];
 
   singlePurchase?: boolean;
+  onPurchase?: (
+    state: GameState,
+    unit: UnitBlueprint,
+    quantity: Decimal,
+    mutators: EngineMutators
+  ) => void;
+
+  customPurchaseText?: string;
 }
 
 export const geometricProgressionPurchase = (
@@ -257,6 +267,8 @@ export function purchasable<
       ...config.metadata,
       purchasable: true,
       singlePurchase: options.singlePurchase === true,
+      onPurchase: options.onPurchase,
+      customPurchaseText: options.customPurchaseText,
     },
     getNodes: (key: Key) => {
       const originalNodes = originalGetNodes ? originalGetNodes(key) : {};

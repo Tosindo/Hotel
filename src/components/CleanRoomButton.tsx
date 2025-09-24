@@ -5,11 +5,16 @@ import { Progress } from "../core/Progress";
 import { Sprite } from "../core/Sprite";
 import { useEngine } from "../engine/EngineContext";
 import { useEngineSelector } from "../engine/useEngineSelector";
-import { Global } from "../units/Global";
+import { Global } from "../units/System/Global";
 import { Cleaning } from "../units/Staff/Cleaning";
 
 const CleanRoomButton: React.FC = () => {
   const engine = useEngine();
+
+  const unlockedCleaning = useEngineSelector(
+    [Global.key.getComputedValueKey("unlockedCleaning")],
+    (engine) => () => engine.getComputedBoolean(Global.key, "unlockedCleaning")
+  );
 
   const dirtyRooms = useEngineSelector(
     [Global.key.getStateValueKey("dirtyRooms")],
@@ -38,12 +43,19 @@ const CleanRoomButton: React.FC = () => {
     engine.dispatchAction(Global.key, "startCleaning");
   };
 
+  const disabled = dirtyRooms.lte(0) || isCleaning;
+
+  if (!unlockedCleaning) return null;
+
   return (
     <Tooltip content="Clean a dirty room" side="bottom">
       <BigButton
         onClick={onClick}
-        disabled={dirtyRooms.lte(0) || isCleaning}
+        disabled={disabled}
         aria-busy={isCleaning ? "true" : "false"}
+        data-cursor={
+          isCleaning ? "broomAnim" : disabled ? "not-allowed" : "broom"
+        }
       >
         <Sprite type="cleaning" size={48} />
         Clean Room{" "}

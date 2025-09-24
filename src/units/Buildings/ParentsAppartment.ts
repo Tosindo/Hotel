@@ -11,16 +11,16 @@ import {
   createModifierNode,
   createValueNode,
 } from "../../engine/createCalculationNode";
-import { Global } from "../Global";
+import { Global } from "../System/Global";
 import { NODE_PRIORITY } from "../../priorities";
 import { unlockable } from "../../middlewares/unlockable";
-import { defaultUnlockCondition } from "../UnlockManager";
+import { defaultUnlockCondition } from "../System/UnlockManager";
 import { displayable, staticDisplayable } from "../../middlewares/displayable";
 import { Cleaning } from "../Staff/Cleaning";
 import { Receptionist } from "../Staff/Receptionist";
 
-const YourAppartment = createUnitBlueprint(
-  "yourAppartment",
+const ParentsAppartment = createUnitBlueprint(
+  "parentsAppartment",
   purchasable(
     displayable(
       {
@@ -52,15 +52,6 @@ const YourAppartment = createUnitBlueprint(
                   "potentialIncome"
                 );
 
-                console.log(
-                  "Global potential income:",
-                  globalPotentialIncome.toString()
-                );
-                console.log(
-                  "Building potential income:",
-                  buildingPotentialIncome.toString()
-                );
-
                 return {
                   [Global.key.getComputedValueKey("potentialIncome")]:
                     globalPotentialIncome.add(buildingPotentialIncome),
@@ -69,15 +60,11 @@ const YourAppartment = createUnitBlueprint(
             }),
           };
         },
-
-        initialize(key, _, { updateCount }) {
-          updateCount(key, DecimalOne);
-        },
       },
       staticDisplayable({
-        name: "Your Apartment",
+        name: "Parents' House",
         description:
-          "A cozy apartment inherited from your deceased parents. On tough times anything is an hotel. You setup a table in the hallway and start receiving guests.",
+          "Your childhood home, now inherited from your parents. It feels empty without them. Low on cash, you could try renting out some rooms.",
         sprite: "unknown",
       })
     ),
@@ -85,40 +72,49 @@ const YourAppartment = createUnitBlueprint(
       costFormula: () => DecimalZero,
       maxFormula: () => DecimalOne,
       singlePurchase: true,
+      customPurchaseText: "Move In",
     }
   )
 );
 
 const GuestRoom = createUnitBlueprint(
   "ownAppartmentGuestRoom",
-  roomify(
-    purchasable(
-      displayable(
-        {
-          type: UnitType.ROOM,
+  unlockable(
+    roomify(
+      purchasable(
+        displayable(
+          {
+            type: UnitType.ROOM,
 
-          // No additional nodes for now
-          getNodes() {
-            return {};
+            // No additional nodes for now
+            getNodes() {
+              return {};
+            },
           },
-        },
-        staticDisplayable({
-          name: "The Guest Room",
-          description:
-            "Re-purpose your own apartment's extra room to host guests and make some money on the side.",
-          sprite: "singleRoom",
-        })
+          staticDisplayable({
+            name: "The Guest Room",
+            description:
+              "Re-purpose your own parents' extra room to host guests and make some money on the side.",
+            sprite: "singleRoom",
+          })
+        ),
+        {
+          costFormula: () => DecimalZero,
+          maxFormula: () => DecimalOne,
+          singlePurchase: true,
+          customPurchaseText: "Prepare room",
+        }
       ),
       {
-        costFormula: () => DecimalZero,
-        maxFormula: () => DecimalOne,
-        singlePurchase: true,
+        individualValueFormula: () => new Decimal(2),
+        potentialIncomeKey: ParentsAppartment.key,
+        potentialIncomeTarget: "potentialIncome",
       }
     ),
     {
-      individualValueFormula: () => new Decimal(2),
-      potentialIncomeKey: YourAppartment.key,
-      potentialIncomeTarget: "potentialIncome",
+      unlockCondition: defaultUnlockCondition((state) => {
+        return ParentsAppartment.key.getCount(state).gte(1);
+      }),
     }
   )
 );
@@ -152,7 +148,46 @@ const LivingRoom = createUnitBlueprint(
       ),
       {
         individualValueFormula: () => new Decimal(10),
-        potentialIncomeKey: YourAppartment.key,
+        potentialIncomeKey: ParentsAppartment.key,
+        potentialIncomeTarget: "potentialIncome",
+      }
+    ),
+    {
+      unlockCondition: defaultUnlockCondition(),
+    }
+  )
+);
+
+const YourRoom = createUnitBlueprint(
+  "ownAppartmentYourRoom",
+  unlockable(
+    roomify(
+      purchasable(
+        displayable(
+          {
+            type: UnitType.ROOM,
+
+            // No additional nodes for now
+            getNodes() {
+              return {};
+            },
+          },
+          staticDisplayable({
+            name: "Sacrifice Your Room",
+            description:
+              "Let go of your own comfort and turn your own bedroom into a double bunk bed room to host more guests. All for the greater good of the hotel.",
+            sprite: "quadRoom",
+          })
+        ),
+        {
+          costFormula: () => new Decimal(200),
+          maxFormula: () => DecimalOne,
+          singlePurchase: true,
+        }
+      ),
+      {
+        individualValueFormula: () => new Decimal(30),
+        potentialIncomeKey: ParentsAppartment.key,
         potentialIncomeTarget: "potentialIncome",
       }
     ),
@@ -500,14 +535,15 @@ const CaffeinatedJitters = createUnitBlueprint(
   )
 );
 
-export const OwnRoomUnits = [
-  YourAppartment,
+export const ParentsAppartmentUnits = [
+  ParentsAppartment,
   GuestRoom,
   LivingRoom,
+  YourRoom,
   HelpingHand,
   Jervasio,
   LonelyFlower,
   CaffeinatedJitters,
 ];
 
-export { YourAppartment, GuestRoom, LivingRoom, HelpingHand };
+export { ParentsAppartment, GuestRoom, LivingRoom, HelpingHand };

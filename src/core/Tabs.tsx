@@ -59,7 +59,9 @@ const TabsTrigger: React.FC<ComponentProps<typeof TabsPrimitive.Trigger>> = ({
           py: "2",
           border: "retro-border",
           fontWeight: "bold",
-
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "2",
           shadow: "inset-retro",
           borderColor: "retro.700",
           borderBottom: "none",
@@ -67,9 +69,9 @@ const TabsTrigger: React.FC<ComponentProps<typeof TabsPrimitive.Trigger>> = ({
           position: "relative",
           fontSize: "md",
 
-          cursor: "pointer",
+          "--cursor": "pointer",
 
-          ["&:first-child:not([data-state='active']), & + &:not(:last-child):not([data-state='active'])"]:
+          ["&:first-child:not([data-state='active']):not(:only-child), &:not(:only-child) + &:not(:last-child):not([data-state='active'])"]:
             {
               borderRight: "none",
             },
@@ -78,7 +80,7 @@ const TabsTrigger: React.FC<ComponentProps<typeof TabsPrimitive.Trigger>> = ({
             bg: "retro.300",
             borderBottomColor: "transparent",
             shadow: "[none]",
-            cursor: "default",
+            "--cursor": "default",
             color: "retro.900",
 
             top: "-1",

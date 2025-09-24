@@ -6,7 +6,7 @@ import { useUnitsEngineSelector } from "./useUnitsEngineSelector";
 import { useUnlockedUnits } from "./useUnlockedUnits";
 import { useMemo } from "react";
 
-const useHasAffordableUnit = (type: UnitType) => {
+const useStorePaneInfo = (type: UnitType) => {
   const engine = useEngine();
   const unlockedUnits = useUnlockedUnits();
   const money = useMoney();
@@ -37,23 +37,26 @@ const useHasAffordableUnit = (type: UnitType) => {
     }
   );
 
-  return useMemo(() => {
-    for (const unit of baseUnits) {
-      const cost = unitCost.get(unit.key.toString());
-      const max = unitMax.get(unit.key.toString());
-      const count = unitCount.get(unit.key.toString());
+  return {
+    hasUnits: baseUnits.length > 0,
+    hasAffordableUnit: useMemo(() => {
+      for (const unit of baseUnits) {
+        const cost = unitCost.get(unit.key.toString());
+        const max = unitMax.get(unit.key.toString());
+        const count = unitCount.get(unit.key.toString());
 
-      if (max && count && count.gte(max)) {
-        continue;
+        if (max && count && count.gte(max)) {
+          continue;
+        }
+
+        if (cost && (money.gte(cost) || cost.lte(0))) {
+          return true;
+        }
       }
 
-      if (cost && (money.gte(cost) || cost.lte(0))) {
-        return true;
-      }
-    }
-
-    return false;
-  }, [baseUnits, money, unitCost, unitCount, unitMax]);
+      return false;
+    }, [baseUnits, money, unitCost, unitCount, unitMax]),
+  };
 };
 
-export { useHasAffordableUnit };
+export { useStorePaneInfo };

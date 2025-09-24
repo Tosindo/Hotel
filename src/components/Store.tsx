@@ -4,15 +4,20 @@ import { ScrollArea } from "../core/ScrollArea";
 import { Sprite } from "../core/Sprite";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../core/Tabs";
 import { UnitType } from "../engine/types";
-import { useHasAffordableUnit } from "../hooks/useHasAffordableUnit";
+import { useStorePaneInfo } from "../hooks/useHasAffordableUnit";
 import { PurchasePane } from "./PurchasePane";
 
 const Store: React.FC = () => {
-  const hasAfordableRoom = useHasAffordableUnit(UnitType.ROOM);
-  const hasAfordableBuilding = useHasAffordableUnit(UnitType.BUILDING);
-  const hasAfordableService = useHasAffordableUnit(UnitType.SERVICE);
-  const hasAfordableUpgrade = useHasAffordableUnit(UnitType.UPGRADE);
-  const hasAfordableStaff = useHasAffordableUnit(UnitType.STAFF);
+  const { hasAffordableUnit: hasAffordableRoom, hasUnits: hasRooms } =
+    useStorePaneInfo(UnitType.ROOM);
+  const { hasAffordableUnit: hasAffordableBuilding, hasUnits: hasBuildings } =
+    useStorePaneInfo(UnitType.BUILDING);
+  const { hasAffordableUnit: hasAffordableService, hasUnits: hasServices } =
+    useStorePaneInfo(UnitType.SERVICE);
+  const { hasAffordableUnit: hasAffordableUpgrade, hasUnits: hasUpgrades } =
+    useStorePaneInfo(UnitType.UPGRADE);
+  const { hasAffordableUnit: hasAffordableStaff, hasUnits: hasStaff } =
+    useStorePaneInfo(UnitType.STAFF);
 
   return (
     <div
@@ -24,6 +29,10 @@ const Store: React.FC = () => {
         flexWrap: "wrap",
         flexGrow: 1,
         minHeight: "0", // important for flexbox
+
+        marginTop: "auto",
+        height: "[400px]",
+        maxHeight: "[50vh]",
       })}
     >
       <section
@@ -32,22 +41,62 @@ const Store: React.FC = () => {
           height: "full",
           width: "full",
           md: {
-            width: "1/2",
+            width: "2/3",
           },
         })}
       >
-        <Tabs defaultValue="rooms" className={css({ height: "full" })}>
+        <Tabs defaultValue="buildings" className={css({ height: "full" })}>
           <TabsList>
-            <TabsTrigger value="rooms">
-              Rooms {hasAfordableRoom && <Sprite type="ball" size={12} />}
-            </TabsTrigger>
-            <TabsTrigger value="services">
-              Services {hasAfordableService && <Sprite type="ball" size={12} />}
-            </TabsTrigger>
-            <TabsTrigger value="buildings">
-              Buildings{" "}
-              {hasAfordableBuilding && <Sprite type="ball" size={12} />}
-            </TabsTrigger>
+            {hasBuildings && (
+              <TabsTrigger value="buildings">
+                Buildings{" "}
+                <Sprite
+                  type="ball"
+                  size={18}
+                  style={{ opacity: hasAffordableBuilding ? 1 : 0 }}
+                />
+              </TabsTrigger>
+            )}
+            {hasRooms && (
+              <TabsTrigger value="rooms">
+                Rooms{" "}
+                <Sprite
+                  type="ball"
+                  size={18}
+                  style={{ opacity: hasAffordableRoom ? 1 : 0 }}
+                />
+              </TabsTrigger>
+            )}
+            {hasUpgrades && (
+              <TabsTrigger value="upgrades">
+                Upgrades{" "}
+                <Sprite
+                  type="ball"
+                  size={18}
+                  style={{ opacity: hasAffordableUpgrade ? 1 : 0 }}
+                />
+              </TabsTrigger>
+            )}
+            {hasStaff && (
+              <TabsTrigger value="staff">
+                Staff{" "}
+                <Sprite
+                  type="ball"
+                  size={18}
+                  style={{ opacity: hasAffordableStaff ? 1 : 0 }}
+                />
+              </TabsTrigger>
+            )}
+            {hasServices && (
+              <TabsTrigger value="services">
+                Services{" "}
+                <Sprite
+                  type="ball"
+                  size={18}
+                  style={{ opacity: hasAffordableService ? 1 : 0 }}
+                />
+              </TabsTrigger>
+            )}
           </TabsList>
           <TabsContent
             value="rooms"
@@ -62,7 +111,11 @@ const Store: React.FC = () => {
               <PurchasePane type={UnitType.ROOM} sortBy="baseCost" />
             </ScrollArea>
           </TabsContent>
-          <TabsContent value="services">Not yet available :(</TabsContent>
+          <TabsContent value="services">
+            <ScrollArea className={css({ maxH: "full", w: "full" })}>
+              <PurchasePane type={UnitType.SERVICE} sortBy="baseCost" />
+            </ScrollArea>
+          </TabsContent>
           <TabsContent
             value="buildings"
             className={css({
@@ -76,28 +129,7 @@ const Store: React.FC = () => {
               <PurchasePane type={UnitType.BUILDING} sortBy="baseCost" />
             </ScrollArea>
           </TabsContent>
-        </Tabs>
-      </section>
 
-      <section
-        className={vstack({
-          gap: "0",
-          width: "full",
-          height: "full",
-          md: {
-            width: "1/2",
-          },
-        })}
-      >
-        <Tabs defaultValue="upgrades" className={css({ height: "full" })}>
-          <TabsList>
-            <TabsTrigger value="upgrades">
-              Upgrades {hasAfordableUpgrade && <Sprite type="ball" size={12} />}
-            </TabsTrigger>
-            <TabsTrigger value="staff">
-              Staff {hasAfordableStaff && <Sprite type="ball" size={12} />}
-            </TabsTrigger>
-          </TabsList>
           <TabsContent
             value="upgrades"
             className={css({
@@ -128,52 +160,27 @@ const Store: React.FC = () => {
                 })}
               >
                 <PurchasePane type={UnitType.STAFF} sortBy="baseCost" />
-
-                {/* <Purchasable
-                          spriteType="juniorReceptionist"
-                          label="Hire junior receptionist"
-                          description="A good for nothing junior receptionist to check in guests for you, don't expect much."
-                          cost={juniorReceptionistPrice}
-                          count={hiredJuniorReceptionists}
-                          maxCount={maxJuniors}
-                          onPurchase={() =>
-                            useHotelStore.getState().hireJuniorReceptionist()
-                          }
-                        />
-                        <Purchasable
-                          spriteType="juniorCleaner"
-                          label="Hire junior cleaner"
-                          description="A junior cleaner, you feel like the rooms are dirtyer when they leave, but the guests seem happy enough."
-                          cost={juniorCleanerPrice}
-                          count={hiredJuniorCleaners}
-                          maxCount={maxJuniors}
-                          onPurchase={() =>
-                            useHotelStore.getState().hireJuniorCleaner()
-                          }
-                        />
-                        <Purchasable
-                          spriteType="receptionist"
-                          label="Hire receptionist"
-                          description="A friendly receptionist to check in guests."
-                          cost={receptionistPrice}
-                          count={hiredReceptionists}
-                          onPurchase={() =>
-                            useHotelStore.getState().hireReceptionist()
-                          }
-                        />
-                        <Purchasable
-                          spriteType="cleaner"
-                          label="Hire cleaner"
-                          description="A friendly cleaner to keep the rooms tidy."
-                          cost={cleanerPrice}
-                          count={hiredCleaners}
-                          onPurchase={() =>
-                            useHotelStore.getState().hireCleaner()
-                          }
-                        /> */}
               </div>
             </ScrollArea>
           </TabsContent>
+        </Tabs>
+      </section>
+
+      <section
+        className={vstack({
+          gap: "0",
+          width: "full",
+          height: "full",
+          md: {
+            width: "1/3",
+          },
+        })}
+      >
+        <Tabs defaultValue="notableGuests" className={css({ height: "full" })}>
+          <TabsList>
+            <TabsTrigger value="notableGuests">Notable Guests</TabsTrigger>
+          </TabsList>
+          <TabsContent value="notableGuests"></TabsContent>
         </Tabs>
       </section>
     </div>
