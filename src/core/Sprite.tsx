@@ -65,7 +65,7 @@ const Sprite: React.FC<SpriteProps> = ({ type, className, size = 64 }) => {
         className
       )}
       style={{
-        maskImage: `url("/SpriteSheet.png?c=${cacheBuster}")`,
+        maskImage: `url("${import.meta.env.BASE_URL}SpriteSheet.png?c=${cacheBuster}")`,
 
         width: `${size}px`,
         height: `${size}px`,
