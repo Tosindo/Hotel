@@ -35,6 +35,14 @@ format is not compatible with this version.
 - **Audio:** "Crumpling Piece of Paper.wav" by F.M.Audio, licensed
   [CC BY 4.0](https://freesound.org/s/561145/).
 
+## License
+
+- **Code** is MIT licensed — see [LICENSE](./LICENSE).
+- **Art** (sprite sheets, animations, icon) is **All Rights Reserved**. Not licensed for
+  reuse — see [ART.md](./ART.md).
+- **Audio** is not covered by either of the above and remains under its own licenses;
+  see [ART.md](./ART.md).
+
 ## Development
 
 Requires [Bun](https://bun.sh) (or npm).
