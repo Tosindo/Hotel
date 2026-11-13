@@ -3,11 +3,11 @@ import { createUnitBlueprint } from "../../engine/createUnitBlueprint";
 import { UnitType } from "../../engine/types";
 
 const audioFiles = {
-  success: "/audio/success.wav",
-  success_distorted: "/audio/success_distorted.wav",
-  failure: "/audio/failure.wav",
-  failure_distorted: "/audio/failure_distorted.wav",
-  paper: "/audio/paper.wav",
+  success: `${import.meta.env.BASE_URL}audio/success.wav`,
+  success_distorted: `${import.meta.env.BASE_URL}audio/success_distorted.wav`,
+  failure: `${import.meta.env.BASE_URL}audio/failure.wav`,
+  failure_distorted: `${import.meta.env.BASE_URL}audio/failure_distorted.wav`,
+  paper: `${import.meta.env.BASE_URL}audio/paper.wav`,
 };
 
 const Sound = createUnitBlueprint("sound", {

@@ -1,5 +1,8 @@
 import { useEffect, useRef } from "react";
-import { getGameStateSaveFromLocalStorage } from "../utils/saveManager";
+import {
+  getGameStateSaveFromLocalStorage,
+  saveGameStateToLocalStorage,
+} from "../utils/saveManager";
 import { useEngine } from "../engine/EngineContext";
 
 const useAutosave = () => {
@@ -20,7 +23,7 @@ const useAutosave = () => {
     const saveInterval = setInterval(() => {
       const saveState = engine.getSaveGameState();
       if (!saveState) return;
-      localStorage.setItem("idleHotelSave", JSON.stringify(saveState));
+      saveGameStateToLocalStorage(saveState);
     }, 10000);
 
     return () => clearInterval(saveInterval);

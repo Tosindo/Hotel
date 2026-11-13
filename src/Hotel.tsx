@@ -85,7 +85,11 @@ const Hotel: React.FC = () => {
 
   return (
     <>
-      <audio src="/click.wav" preload="auto" ref={buttonClickAudioRef} />
+      <audio
+        src={`${import.meta.env.BASE_URL}click.wav`}
+        preload="auto"
+        ref={buttonClickAudioRef}
+      />
       <Cursor />
       <div
         ref={rootRef}

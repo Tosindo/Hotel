@@ -50,13 +50,13 @@ export const spriteCoordinates = {
 
 export const spriteAnimationConfig = {
   distributeFlyersWalk: {
-    url: "/animations/DistributingFlyersWalk.png",
+    url: `${import.meta.env.BASE_URL}animations/DistributingFlyersWalk.png`,
     frameCount: 40,
     frameSize: 64,
     duration: 2850, // 14 frames per second
   },
   distributeFlyersGive: {
-    url: "/animations/DistributingFlyersGive.png",
+    url: `${import.meta.env.BASE_URL}animations/DistributingFlyersGive.png`,
     frameCount: 15,
     frameSize: 64,
     duration: 1100, // 14 frames per second
