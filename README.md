@@ -1,69 +1,52 @@
-# React + TypeScript + Vite
+# Idle Hotel
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An incremental horror game about running a hotel that maybe shouldn't be run.
 
-Currently, two official plugins are available:
+You inherit a building, start renting out rooms, and gradually expand into something
+worse. It's early days — **very much in development** — and the horror is admittedly
+still a bit missing. The plan is for it to arrive.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Play
 
-## Expanding the ESLint configuration
+Both versions are hosted on GitHub Pages:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **[Play the current version](https://tosindo.github.io/Hotel/)** — the old, more
+  complete build. This is the one to play right now.
+- **[New engine preview](https://tosindo.github.io/Hotel/new-engine/)** — a rewrite
+  built on a new computation engine. **Very incomplete.** It's a technical preview of
+  where the game is heading, not a playable version.
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## The two versions
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+The `main` branch is the original build. It runs on the older store-and-update approach
+and has the most content: rooms, staff, buildings, and upgrades.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+The `new-engine` branch (this one) replaces that with a dependency-graph computation
+engine — units declare what they depend on, and values are recomputed through the graph
+instead of being pushed around manually. That makes adding content far more tractable,
+which is why the rewrite is happening. It is currently missing most of the actual game,
+and its save format is not compatible with the old version.
+
+## Credits
+
+- **Art:** all human made.
+- **Code:** written with AI assistance.
+- **Audio:** "Crumpling Piece of Paper.wav" by F.M.Audio, licensed
+  [CC BY 4.0](https://freesound.org/s/561145/).
+
+## Development
+
+Requires [Bun](https://bun.sh) (or npm).
+
+```bash
+bun install
+bun run dev      # dev server
+bun run build    # production build
+bun run lint
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+The deploy serves from a subpath on GitHub Pages, so the base path is configurable:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+BASE_PATH=/Hotel/new-engine/ bun run build
 ```
